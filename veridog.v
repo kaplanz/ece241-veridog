@@ -10,6 +10,8 @@ module veridog(
     input CLOCK_50,         // On Board 50 MHz
     // Your inputs and outputs here
     input [3:0] KEY,        // On Board Keys
+    input [9:0] SW,         // On Board Switches
+    input [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, // On Board HEX
 
     // The ports below are for the VGA output.  Do not change.
     input VGA_CLK,          // VGA Clock
@@ -21,6 +23,12 @@ module veridog(
     input VGA_G,            // VGA Green[9:0]
     input VGA_B             // VGA Blue[9:0]
     );
+
+    wire resetn = SW[9];
+    wire [3:0] colour;
+    wire [7:0] x;
+    wire [6:0] y;
+    wire writeEn;
 
     // Create an Instance of a VGA controller - there can be only one!
     // Define the number of colours as well as the initial background
@@ -41,9 +49,27 @@ module veridog(
             .VGA_BLANK(VGA_BLANK_N),
             .VGA_SYNC(VGA_SYNC_N),
             .VGA_CLK(VGA_CLK));
+
         defparam VGA.RESOLUTION = "160x120";
         defparam VGA.MONOCHROME = "FALSE";
         defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
 		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
+
+    // Declare wires
+    wire [4:0] location, activity;
+    wire keys = ~KEY[2:0];
+
+    // Initialize modules
+    navigation nav(
+        .clk(CLOCK_50),
+        .resetn(resetn),
+        .keys(key),
+        .location(location),
+        .activity(activity)
+    );
+
+    // DEBUG
+    seg7 hex1(location, HEX1);
+    seg7 hex0(activity, HEX0);
 endmodule
