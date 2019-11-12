@@ -7,9 +7,9 @@
 //
 
 module navigation(
-    input clk,
     input resetn,
-    input keys,
+    input clk,
+    input [2:0] keys,
 
     output [4:0] location, activity
     );
@@ -35,28 +35,31 @@ module navigation(
     always @(*)
     begin: stateTable
         case (currentState)
-            ROOT: // choose next location
+            ROOT: begin // choose next location
                 case (keys)
                     3'b100: nextState = HOME;
                     3'b001: nextState = ARCADE;
                     default: nextState = ROOT;
                 endcase
+            end
 
             // wait until button is released for menu
             HOME: nextState = (keys) ? HOME_MENU : HOME;
-            HOME_MENU: // choose activity
+            HOME_MENU: begin // choose activity
                 case (keys)
                     3'b100: nextState = EAT;
                     3'b001: nextState = SLEEP;
-                    default: HOME_MENU;
+                    default: nextState = HOME_MENU;
                 endcase
+            end
 
             // wait until button is released for menu
             ARCADE: nextState = (keys) ? ARCADE_MENU : ARCADE;
-            ARCADE_MENU: // choose activity
+            ARCADE_MENU: begin // choose activity
                 case (keys)
-                    default: ARCADE_MENU;
+                    default: nextState = ARCADE_MENU;
                 endcase
+            end
 
             // default to ROOT state
             default: nextState = ROOT;

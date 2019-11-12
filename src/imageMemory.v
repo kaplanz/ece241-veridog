@@ -8,7 +8,7 @@
 
 module locationMemory(
     input [4:0] location,
-    output [7:0] image [6:0],
+    output [7:0] image [6:0][6:0]
     );
 
     localparam  ROOT    = 4'h0,
