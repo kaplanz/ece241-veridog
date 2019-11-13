@@ -18,7 +18,6 @@ module draw #(
 
     output [X_WIDTH-1:0] xOut,
     output [Y_WIDTH-1:0] yOut,
-    output reg [7:0] colour,
     output reg writeEn,
     output reg done
     );
@@ -71,14 +70,12 @@ module draw #(
                         done = 1'b1;
                     end
                 end
-                colour = 8'b0; // FIXME
             end
             WRITE: writeEn = 1'b1;
             DONE: done = 1'b1;
             default: begin
                 x = {X_WIDTH{1'b0}};
                 y = {Y_WIDTH{1'b0}};
-                colour = 8'b0;
                 writeEn = 1'b0;
                 done = 1'b0;
             end
