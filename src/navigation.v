@@ -14,7 +14,7 @@ module navigation(
     output [4:0] location, activity
     );
 
-    // state registers
+    // State registers
     reg [8:0] currentState, nextState;
 
     localparam  ROOT        = 8'h00,
@@ -28,13 +28,13 @@ module navigation(
                 ARCADE_MENU = 8'h20;
 
 
-    // left hexidecimal digit encodes location to draw
+    // Left hexidecimal digit encodes location to draw
     assign location = currentState[7:4];
-    // right hexidecimal digit encodes activity
+    // Right hexidecimal digit encodes activity
     assign activity = currentState[3:0];
 
 
-    // state table tree structure
+    // State table tree structure
     always @(*)
     begin: stateTable
         case (currentState)
@@ -46,7 +46,7 @@ module navigation(
                 endcase
             end
 
-            // wait until button is released for menu
+            // Wait until button is released for menu
             HOME: nextState = (keys) ? HOME_MENU : HOME;
             HOME_MENU: begin // choose activity
                 case (keys)
@@ -56,7 +56,7 @@ module navigation(
                 endcase
             end
 
-            // wait until button is released for menu
+            // Wait until button is released for menu
             ARCADE: nextState = (keys) ? ARCADE_MENU : ARCADE;
             ARCADE_MENU: begin // choose activity
                 case (keys)
@@ -64,13 +64,13 @@ module navigation(
                 endcase
             end
 
-            // default to ROOT state
+            // Default to ROOT state
             default: nextState = ROOT;
         endcase
     end // stateTable
 
 
-    // update state registers
+    // Update state registers
     always @(posedge clk)
     begin: stateFFs
         if (!resetn)

@@ -27,7 +27,7 @@ module draw #(
                 Y_MAX   = 120;
 
 
-    // state registers
+    // State registers
     reg [1:0] currentState, nextState;
 
     localparam  IDLE    = 2'h0,
@@ -36,7 +36,7 @@ module draw #(
                 DONE    = 2'h3;
 
 
-    // drawing state table
+    // Drawing state table
     always @(*)
     begin: stateTable
         case (currentState)
@@ -49,15 +49,15 @@ module draw #(
     end // stateTable
 
 
-    // iterators
+    // Iterators
     reg [X_WIDTH-1:0] x;
     reg [Y_WIDTH-1:0] y;
 
-    // output coordinates
+    // Output coordinates
     assign xOut = xInit + x;
     assign yOut = yInit + y;
 
-    // perform state functions
+    // Perform state functions
     always @(*)
     begin: stateFunctions
         case (currentState)
@@ -86,7 +86,7 @@ module draw #(
     end // stateFunctions
 
 
-    // update state registers
+    // Update state registers
     always @(posedge clk)
     begin: stateFFs
         if (!resetn)
