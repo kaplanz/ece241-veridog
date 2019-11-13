@@ -12,24 +12,27 @@ module veridog(
     input [9:0] SW,         // On Board Switches
 
     output [6:0] HEX0, HEX1,// On Board HEX
-    // The ports below are for the VGA output.  Do not change.
+//	 output [6:0] HEX2, HEX3,
+//	 output [6:0] HEX4, HEX5,
+	 output [9:0] LEDR,      // On Board LEDs
+	 
     output VGA_CLK,         // VGA Clock
     output VGA_HS,          // VGA H_SYNC
     output VGA_VS,          // VGA V_SYNC
     output VGA_BLANK_N,     // VGA BLANK
     output VGA_SYNC_N,      // VGA SYNC
-    output VGA_R,           // VGA Red[9:0]
-    output VGA_G,           // VGA Green[9:0]
-    output VGA_B            // VGA Blue[9:0]
+    output [7:0] VGA_R,     // VGA Red[9:0]
+    output [7:0] VGA_G,     // VGA Green[9:0]
+    output [7:0] VGA_B      // VGA Blue[9:0]
     );
 
     // Reset signal
-    wire resetn = SW[9];
+    wire resetn = KEY[3];
 
     // VGA wires
     reg [7:0] x;
     reg [6:0] y;
-    reg [8:0] colour;
+    reg [7:0] colour;
     wire writeEn;
     wire done;
 
@@ -55,7 +58,7 @@ module veridog(
         defparam VGA.RESOLUTION = "160x120";
         defparam VGA.MONOCHROME = "FALSE";
         defparam VGA.BITS_PER_COLOUR_CHANNEL = 2;
-		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
+		  defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
     // -- Local parameters --
@@ -99,7 +102,7 @@ module veridog(
         .writeEn(wHome),
         .done(dHome)
     );
-    defparam drawHome.IMAGE = "./assets/home.mif";
+    defparam drawHome.IMAGE = "assets/home.mif";
     draw160x120 drawArcade(
         .resetn(resetn),
         .clk(CLOCK_50),
@@ -110,7 +113,7 @@ module veridog(
         .writeEn(wArcade),
         .done(dArcade)
     );
-    defparam drawHome.IMAGE = "./assets/arcade.mif";
+    defparam drawArcade.IMAGE = "assets/arcade.mif";
 
 
     // VGA signal assignments
@@ -125,6 +128,11 @@ module veridog(
                 y <= yHome;
                 colour <= cHome;
             end
+				ARCADE: begin
+                x <= xHome;
+                y <= yHome;
+                colour <= cHome;
+				end
             default: begin
                 x <= 8'bz;
                 y <= 7'bz;
@@ -137,4 +145,9 @@ module veridog(
     // -- DEBUG --
     seg7 hex1(location, HEX1);
     seg7 hex0(activity, HEX0);
+	 
+//	 seg7 hex5(x, HEX5);
+//	 seg7 hex4(y, HEX4);
+//	 assign LEDR[9] = start;
+//	 assign LEDR[8] = writeEn;
 endmodule

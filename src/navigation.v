@@ -66,7 +66,7 @@ module navigation(
 
 
     // Transition occurs whenever the next state is different from the current state
-    assign transition = (nextState != currentState);
+    assign transition = (keys != 3'b0);
     // Left hexidecimal digit encodes location to draw
     assign location = currentState[7:4];
     // Right hexidecimal digit encodes activity
@@ -81,4 +81,7 @@ module navigation(
         else
             currentState <= nextState;
     end // stateFFs
+	 
+	 // at home: key[1] = arcade
+	 // at arcade: key[2] = home
 endmodule
