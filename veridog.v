@@ -24,9 +24,11 @@ module veridog(
     );
 
     wire resetn = SW[9];
-    reg [3:0] colour;
+
+    // VGA wires
     reg [7:0] x;
     reg [6:0] y;
+    reg [8:0] colour;
     wire writeEn;
 
     // Create an Instance of a VGA controller - there can be only one!
@@ -64,10 +66,10 @@ module veridog(
 
     wire [8:0] xHome;
     wire [7:0] yHome;
-    wire cHome;
+    wire [8:0] cHome;
     wire drawHome;
 
-    draw #(8, 7, 160, 120) home(
+    draw #(8, 7) home(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start == HOME),
@@ -95,9 +97,13 @@ module veridog(
                 y = yHome;
                 colour = cHome;
             end
+            default: begin
+                x = 8'bz;
+                y = 7'bz;
+                colour = 8'bz;
+            end
         endcase
     end // vgaSignals
-
 
 
     // Navigation

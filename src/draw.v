@@ -61,18 +61,11 @@ module draw #(
     always @(*)
     begin: stateFunctions
         case (currentState)
-            IDLE: begin
-                x = {X_WIDTH{1'b0}};
-                y = {X_WIDTH{1'b0}};
-                colour = 8'b0;
-                writeEn = 1'b0;
-                done = 1'b0;
-            end
             LOAD: begin
-                x++;
+                x = x + {{X_WIDTH-1{1'b0}}, 1'b1};
                 if (x == X_MAX) begin
                     x = {X_WIDTH{1'b0}};
-                    y++;
+                    y = y + {{Y_WIDTH-1{1'b0}}, 1'b1};
 
                     if (y == Y_MAX) begin
                         done = 1'b1;
@@ -82,6 +75,13 @@ module draw #(
             end
             WRITE: writeEn = 1'b1;
             DONE: done = 1'b1;
+            default: begin
+                x = {X_WIDTH{1'b0}};
+                y = {Y_WIDTH{1'b0}};
+                colour = 8'b0;
+                writeEn = 1'b0;
+                done = 1'b0;
+            end
         endcase
     end // stateFunctions
 
