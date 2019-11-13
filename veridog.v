@@ -23,6 +23,7 @@ module veridog(
     output VGA_B            // VGA Blue[9:0]
     );
 
+    // Reset signal
     wire resetn = SW[9];
 
     // VGA wires
@@ -56,55 +57,7 @@ module veridog(
 		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
-    // VGA drawing
-    reg [3:0] start;
-    wire done;
-
-    localparam  ROOT     = 4'h0,
-                HOME     = 4'h1,
-                ARCADE   = 4'h2;
-
-    wire [8:0] xHome;
-    wire [7:0] yHome;
-    wire [8:0] cHome;
-    wire drawHome;
-
-    draw #(8, 7) home(
-        .resetn(resetn),
-        .clk(CLOCK_50),
-        .start(start == HOME),
-        .xInit(1'b0),
-        .yInit(1'b0),
-        .xOut(xHome),
-        .yOut(yHome),
-        .colour(colourHome),
-        .writeEn(drawHome),
-        .done(doneHome)
-    );
-
-
-    // VGA signal assignments
-    assign writeEn = (drawHome);
-    assign done = (doneHome);
-
-    always @(location, done)
-    begin: vgaSignals
-        start = (~done) ? location : ROOT;
-
-        case (start)
-            HOME: begin
-                x = xHome;
-                y = yHome;
-                colour = cHome;
-            end
-            default: begin
-                x = 8'bz;
-                y = 7'bz;
-                colour = 8'bz;
-            end
-        endcase
-    end // vgaSignals
-
+    // -- Control --
 
     // Navigation
     wire [4:0] location, activity;
@@ -123,7 +76,63 @@ module veridog(
     reg [8:0] tiredness;
 
 
-    // DEBUG
+    // -- VGA --
+
+    // VGA drawing
+    reg [3:0] start;
+    wire done;
+
+    localparam  ROOT     = 4'h0,
+                HOME     = 4'h1,
+                ARCADE   = 4'h2;
+
+    wire [8:0] xHome;
+    wire [7:0] yHome;
+    wire [8:0] cHome;
+    wire drawHome;
+    wire doneHome;
+
+    draw home(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .start(start == HOME),
+        .xInit(1'b0),
+        .yInit(1'b0),
+        .xOut(xHome),
+        .yOut(yHome),
+        .colour(cHome),
+        .writeEn(drawHome),
+        .done(doneHome));
+    defparam    home.X_WIDTH = 8,
+                home.Y_WIDTH = 7,
+                home.X_MAX = 160,
+                home.Y_MAX = 120;
+
+
+    // VGA signal assignments
+    assign writeEn = (drawHome);
+    assign done = (doneHome);
+
+    always @(*)
+    begin: vgaSignals
+        start = (~done) ? location : ROOT;
+
+        case (start)
+            HOME: begin
+                x = xHome;
+                y = yHome;
+                colour = cHome;
+            end
+            default: begin
+                x = 8'bz;
+                y = 7'bz;
+                colour = 8'bz;
+            end
+        endcase
+    end // vgaSignals
+
+
+    // -- DEBUG --
     seg7 hex1(location, HEX1);
     seg7 hex0(activity, HEX0);
 endmodule
