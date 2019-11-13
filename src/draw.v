@@ -27,8 +27,6 @@ module draw160x120(
         .resetn(resetn),
         .clk(clk),
         .start(start),
-        .xInit(8'b0),
-        .yInit(7'b0),
         .x(x),
         .y(y),
         .writeEn(writeEn),
@@ -38,9 +36,13 @@ module draw160x120(
     // Image memory rom for retrieving colour
     rom160x120 ROM(
         .address((160 * y) + x),
-        .clock(CLOCK_50),
+        .clock(clk),
         .q(colour));
     defparam ROM.altsyncram_component.init_file = IMAGE;
+
+    // Position outputs
+    assign xOut = (8'b0 + x);
+    assign yOut = (7'b0 + y);
 endmodule
 
 
@@ -67,8 +69,6 @@ module draw40x40(
         .resetn(resetn),
         .clk(clk),
         .start(start),
-        .xInit(xInit),
-        .yInit(yInit),
         .x(x),
         .y(y),
         .writeEn(writeEn),
@@ -78,9 +78,13 @@ module draw40x40(
     // Image memory rom for retrieving colour
     rom160x120 ROM(
         .address((40 * y) + x),
-        .clock(CLOCK_50),
+        .clock(clk),
         .q(colour));
     defparam ROM.altsyncram_component.init_file = IMAGE;
+
+    // Position outputs
+    assign xOut = (xInit + x);
+    assign yOut = (yInit + y);
 endmodule
 
 

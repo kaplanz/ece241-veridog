@@ -54,7 +54,7 @@ module veridog(
             .VGA_CLK(VGA_CLK));
         defparam VGA.RESOLUTION = "160x120";
         defparam VGA.MONOCHROME = "FALSE";
-        defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
+        defparam VGA.BITS_PER_COLOUR_CHANNEL = 2;
 		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
@@ -99,6 +99,7 @@ module veridog(
         .writeEn(wHome),
         .done(dHome)
     );
+    defparam drawHome.IMAGE = "./assets/home.mif";
     draw160x120 drawArcade(
         .resetn(resetn),
         .clk(CLOCK_50),
@@ -109,6 +110,8 @@ module veridog(
         .writeEn(wArcade),
         .done(dArcade)
     );
+    defparam drawHome.IMAGE = "./assets/arcade.mif";
+
 
     // VGA signal assignments
     assign writeEn = (wHome | wArcade); // Update for each draw module
