@@ -8,7 +8,9 @@
 
 module draw #(
     parameter   X_WIDTH = 8,
-                Y_WIDTH = 7) (
+                Y_WIDTH = 7,
+                X_MAX = 160,
+                Y_MAX = 120) (
 
     input resetn,
     input clk,
@@ -21,9 +23,6 @@ module draw #(
     output reg writeEn,
     output reg done
     );
-
-    parameter   X_MAX   = 160,
-                Y_MAX   = 120;
 
 
     // State registers

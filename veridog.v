@@ -84,7 +84,7 @@ module veridog(
 
     wire [8:0] xBg;
     wire [7:0] yBg;
-    wire drawBg;
+    wire wBg;
     wire doneBg;
 
     draw drawBg(
@@ -95,7 +95,7 @@ module veridog(
         .yInit(1'b0),
         .xOut(xBg),
         .yOut(yBg),
-        .writeEn(drawBg),
+        .writeEn(wBg),
         .done(doneBg));
     defparam    drawBg.X_WIDTH = 8,
                 drawBg.Y_WIDTH = 7,
@@ -120,7 +120,7 @@ module veridog(
 
 
     // VGA signal assignments
-    assign writeEn = (drawBg);
+    assign writeEn = (wBg);
     assign done = (doneBg);
 
     localparam  ROOT     = 4'h0,
