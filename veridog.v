@@ -58,6 +58,13 @@ module veridog(
 		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
+    // -- Local parameters --
+    // Locations
+    localparam  ROOT     = 4'h0,
+                HOME     = 4'h1,
+                ARCADE   = 4'h2;
+
+
     // -- Control --
     // Navigation
     wire start;
@@ -74,11 +81,14 @@ module veridog(
 
 
     // -- VGA --
+    // Drawing wires
+    wire [7:0] xHome, xArcade;
+    wire [6:0] yHome, yArcade;
+    wire [7:0] cHome, cArcade;
+    wire wHome, wArcade;
+    wire dHome, dArcade;
+
     // Drawing modules
-    wire [7:0] xHome;
-    wire [6:0] yHome;
-    wire [7:0] cHome;
-    wire wHome, doneHome;
     draw160x120 drawHome(
         .resetn(resetn),
         .clk(CLOCK_50),
@@ -87,16 +97,22 @@ module veridog(
         .yOut(yHome),
         .colour(cHome),
         .writeEn(wHome),
-        .done(doneHome)
+        .done(dHome)
+    );
+    draw160x120 drawArcade(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .start(start & (location == ARCADE)),
+        .xOut(xArcade),
+        .yOut(yArcade),
+        .colour(cArcade),
+        .writeEn(wArcade),
+        .done(dArcade)
     );
 
     // VGA signal assignments
-    assign writeEn = (wHome); // Update for each draw module
-    assign done = (doneHome); // Update for each draw module
-
-    localparam  ROOT     = 4'h0,
-                HOME     = 4'h1,
-                ARCADE   = 4'h2;
+    assign writeEn = (wHome | wArcade); // Update for each draw module
+    assign done = (dHome | dArcade); // Update for each draw module
 
     always @(*)
     begin: vgaSignals
