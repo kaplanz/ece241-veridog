@@ -6,28 +6,25 @@
 //  Copyright © 2019 Zakhary Kaplan. All rights reserved.
 //
 
-module draw(
+module draw #(
+    parameter   X_WIDTH = 8,
+                Y_WIDTH = 7) (
+
     input resetn,
     input clk,
     input start,
-    input xInit, yInit,
+    input [X_WIDTH-1:0] xInit,
+    input [Y_WIDTH-1:0] yInit,
 
-    output xOut, yOut,
+    output [X_WIDTH-1:0] xOut,
+    output [Y_WIDTH-1:0] yOut,
     output reg [7:0] colour,
-    output reg writeEn
+    output reg writeEn,
     output reg done
     );
 
-    parameter   X_WIDTH = 8,
-                X_MAX   = 160,
-                Y_WIDTH = 7,
+    parameter   X_MAX   = 160,
                 Y_MAX   = 120;
-
-    input [X_WIDTH-1:0] xInit;
-    input [Y_WIDTH-1:0] yInit;
-
-    output [X_WIDTH-1:0] xOut;
-    output [Y_WIDTH-1:0] yOut;
 
 
     // state registers
@@ -48,6 +45,7 @@ module draw(
             WRITE: nextState = (~done) ? LOAD : DONE;
             DONE: nextState = (start) ? DONE : IDLE;
             default: nextState = IDLE;
+        endcase
     end // stateTable
 
 
@@ -84,7 +82,7 @@ module draw(
             end
             WRITE: writeEn = 1'b1;
             DONE: done = 1'b1;
-        end
+        endcase
     end // stateFunctions
 
 
