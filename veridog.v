@@ -24,9 +24,9 @@ module veridog(
     );
 
     wire resetn = SW[9];
-    wire [3:0] colour;
-    wire [7:0] x;
-    wire [6:0] y;
+    reg [3:0] colour;
+    reg [7:0] x;
+    reg [6:0] y;
     wire writeEn;
 
     // Create an Instance of a VGA controller - there can be only one!
@@ -54,7 +54,53 @@ module veridog(
 		defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
-    // Navigation state
+    // VGA drawing
+    reg [3:0] start;
+    wire done;
+
+    localparam  ROOT     = 4'h0,
+                HOME     = 4'h1,
+                ARCADE   = 4'h2;
+
+    wire [8:0] xHome;
+    wire [7:0] yHome;
+    wire cHome;
+    wire drawHome;
+
+    draw #(8, 7, 160, 120) home(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .start(start == HOME),
+        .xInit(1'b0),
+        .yInit(1'b0),
+        .xOut(xHome),
+        .yOut(yHome),
+        .colour(colourHome),
+        .writeEn(drawHome),
+        .done(doneHome)
+    );
+
+
+    // VGA signal assignments
+    assign writeEn = (drawHome);
+    assign done = (doneHome);
+
+    always @(location, done)
+    begin: vgaSignals
+        start = (~done) ? location : ROOT;
+
+        case (start)
+            HOME: begin
+                x = xHome;
+                y = yHome;
+                colour = cHome;
+            end
+        endcase
+    end // vgaSignals
+
+
+
+    // Navigation
     wire [4:0] location, activity;
     wire [2:0] keys = ~KEY[2:0];
     navigation nav(
@@ -64,6 +110,11 @@ module veridog(
         .location(location),
         .activity(activity)
     );
+
+
+    // State registers
+    reg [8:0] hunger;
+    reg [8:0] tiredness;
 
 
     // DEBUG
