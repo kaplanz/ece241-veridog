@@ -11,11 +11,12 @@ module navigation(
     input clk,
     input [2:0] keys,
 
-    output [4:0] location, activity
+    output transition,
+    output [3:0] location, activity
     );
 
     // State registers
-    reg [8:0] currentState, nextState;
+    reg [7:0] currentState, nextState;
 
     localparam  ROOT        = 8'h00,
                 HOME        = 8'h01,
@@ -26,12 +27,6 @@ module navigation(
                 SLEEP       = 8'h12,
 
                 ARCADE_MENU = 8'h20;
-
-
-    // Left hexidecimal digit encodes location to draw
-    assign location = currentState[7:4];
-    // Right hexidecimal digit encodes activity
-    assign activity = currentState[3:0];
 
 
     // State table tree structure
@@ -47,7 +42,7 @@ module navigation(
             end
 
             // Wait until button is released for menu
-            HOME: nextState = (keys) ? HOME_MENU : HOME;
+            HOME: nextState = (keys == 3'b0) ? HOME_MENU : HOME;
             HOME_MENU: begin // choose activity
                 case (keys)
                     3'b100: nextState = EAT;
@@ -57,7 +52,7 @@ module navigation(
             end
 
             // Wait until button is released for menu
-            ARCADE: nextState = (keys) ? ARCADE_MENU : ARCADE;
+            ARCADE: nextState = (keys == 3'b0) ? ARCADE_MENU : ARCADE;
             ARCADE_MENU: begin // choose activity
                 case (keys)
                     default: nextState = ARCADE_MENU;
@@ -68,6 +63,14 @@ module navigation(
             default: nextState = ROOT;
         endcase
     end // stateTable
+
+
+    // Transition occurs whenever the next state is different from the current state
+    assign transition = (nextState != currentState);
+    // Left hexidecimal digit encodes location to draw
+    assign location = currentState[7:4];
+    // Right hexidecimal digit encodes activity
+    assign activity = currentState[3:0];
 
 
     // Update state registers

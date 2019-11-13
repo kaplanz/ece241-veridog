@@ -31,6 +31,7 @@ module veridog(
     reg [6:0] y;
     reg [8:0] colour;
     wire writeEn;
+    wire done;
 
     // Create an Instance of a VGA controller - there can be only one!
     // Define the number of colours as well as the initial background
@@ -58,93 +59,59 @@ module veridog(
 
 
     // -- Control --
-
     // Navigation
-    wire [4:0] location, activity;
+    wire start;
+    wire [3:0] location, activity;
     wire [2:0] keys = ~KEY[2:0];
     navigation nav(
         .resetn(resetn),
         .clk(CLOCK_50),
         .keys(keys),
+        .transition(start),
         .location(location),
         .activity(activity)
     );
 
 
-    // State registers
-    reg [8:0] hunger;
-    reg [8:0] tiredness;
-
-
     // -- VGA --
-
-    // VGA drawing
-    reg start;
-    wire done;
-
-    wire [8:0] xBg;
-    wire [7:0] yBg;
-    wire wBg;
-    wire doneBg;
-
-    draw drawBg(
+    // Drawing modules
+    wire [7:0] xHome;
+    wire [6:0] yHome;
+    wire [7:0] cHome;
+    wire wHome, doneHome;
+    draw160x120 drawHome(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .start(start),
-        .xInit(1'b0),
-        .yInit(1'b0),
-        .xOut(xBg),
-        .yOut(yBg),
-        .writeEn(wBg),
-        .done(doneBg));
-    defparam    drawBg.X_WIDTH = 8,
-                drawBg.Y_WIDTH = 7,
-                drawBg.X_MAX = 160,
-                drawBg.Y_MAX = 120;
-
-
-    // Image ROMs
-    wire [7:0] cHome;
-    rom160x120 homeROM(
-        .address(xBg + 160 * yBg),
-        .clock(CLOCK_50),
-        .q(cHome));
-    defparam homeROM.altsyncram_component.init_file = "./assets/home.mif";
-
-    wire [7:0] cArcade;
-    rom160x120 arcadeROM(
-        .address(xBg + 160 * yBg),
-        .clock(CLOCK_50),
-        .q(cArcade));
-    defparam arcadeROM.altsyncram_component.init_file = "./assets/arcade.mif";
-
+        .start(start & (location == HOME)),
+        .xOut(xHome),
+        .yOut(yHome),
+        .colour(cHome),
+        .writeEn(wHome),
+        .done(doneHome)
+    );
 
     // VGA signal assignments
-    assign writeEn = (wBg);
-    assign done = (doneBg);
+    assign writeEn = (wHome); // Update for each draw module
+    assign done = (doneHome); // Update for each draw module
 
     localparam  ROOT     = 4'h0,
                 HOME     = 4'h1,
                 ARCADE   = 4'h2;
 
-    always @(posedge (location != ROOT)) // FIXME
-    begin: vgaStart
-        start = 1'b1;
-    end // vgaStart
-
     always @(*)
     begin: vgaSignals
-        x <= xBg;
-        y <= yBg;
-
         case (location)
-            HOME: colour <= cHome;
-            ARCADE: colour <= cArcade;
-            default: colour <= 8'bz;
+            HOME: begin
+                x <= xHome;
+                y <= yHome;
+                colour <= cHome;
+            end
+            default: begin
+                x <= 8'bz;
+                y <= 7'bz;
+                colour <= 8'bz;
+            end
         endcase
-
-        if (done)
-            start <= 1'b0;
     end // vgaSignals
 
 
