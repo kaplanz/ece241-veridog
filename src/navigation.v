@@ -16,13 +16,13 @@ module navigation(
     );
 
     // Declare state values
-    localparam  ROOT        = 9'b0'h00,
-                LOAD_HOME   = 9'b1'h10,
-                LOAD_ARCADE = 9'b1'h20,
+    localparam  ROOT        = {1'b0, 8'h00},
+                LOAD_HOME   = {1'b1, 8'h10},
+                LOAD_ARCADE = {1'b1, 8'h20},
 
-                HOME        = 9'b0'h10,
+                HOME        = {1'b0, 8'h10},
 
-                ARCADE      = 9'b0'h20;
+                ARCADE      = {1'b0, 8'h20};
 
     // State register
     reg [8:0] currentState;
