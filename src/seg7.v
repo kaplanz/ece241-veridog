@@ -12,7 +12,7 @@ module seg7(
     );
 
     always @(*)
-    begin
+    begin: dataEncoding
         case (dataIn)
             4'h0: segment = 7'b1000000; // 0
             4'h1: segment = 7'b1111001; // 1
@@ -32,5 +32,5 @@ module seg7(
             4'hF: segment = 7'b0001110; // F
             default: segment = 7'b1111111;
         endcase
-    end
+    end // dataEncoding
 endmodule

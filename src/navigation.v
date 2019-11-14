@@ -15,73 +15,60 @@ module navigation(
     output [3:0] location, activity
     );
 
-    // State registers
-    reg [7:0] currentState, nextState;
+    // Declare state values
+    localparam  ROOT        = 9'b0'h00,
+                LOAD_HOME   = 9'b1'h10,
+                LOAD_ARCADE = 9'b1'h20,
 
-    localparam  ROOT        = 8'h00,
-                HOME        = 8'h01,
-                ARCADE      = 8'h02,
+                HOME        = 9'b0'h10,
 
-                HOME_MENU   = 8'h10,
-                EAT         = 8'h11,
-                SLEEP       = 8'h12,
+                ARCADE      = 9'b0'h20;
 
-                ARCADE_MENU = 8'h20;
+    // State register
+    reg [8:0] currentState;
 
+    // Assign outputs
+    assign transition = currentState[8]; // transition occurs during wait states
+    assign location = currentState[7:4]; // left hex digit encodes location
+    assign activity = currentState[3:0]; // right hex digit encodes activity
 
-    // State table tree structure
-    always @(*)
-    begin: stateTable
-        case (currentState)
-            ROOT: begin // choose next location
-                case (keys)
-                    3'b100: nextState = HOME;
-                    3'b001: nextState = ARCADE;
-                    default: nextState = ROOT;
-                endcase
-            end
-
-            // Wait until button is released for menu
-            HOME: nextState = (keys == 3'b0) ? HOME_MENU : HOME;
-            HOME_MENU: begin // choose activity
-                case (keys)
-                    3'b100: nextState = EAT;
-                    3'b001: nextState = SLEEP;
-                    default: nextState = HOME_MENU;
-                endcase
-            end
-
-            // Wait until button is released for menu
-            ARCADE: nextState = (keys == 3'b0) ? ARCADE_MENU : ARCADE;
-            ARCADE_MENU: begin // choose activity
-                case (keys)
-                    default: nextState = ARCADE_MENU;
-                endcase
-            end
-
-            // Default to ROOT state
-            default: nextState = ROOT;
-        endcase
-    end // stateTable
-
-
-    // Transition occurs whenever the next state is different from the current state
-    assign transition = (keys != 3'b0);
-    // Left hexidecimal digit encodes location to draw
-    assign location = currentState[7:4];
-    // Right hexidecimal digit encodes activity
-    assign activity = currentState[3:0];
-
-
-    // Update state registers
+    // Update state registers, perform incremental logic
     always @(posedge clk)
     begin: stateFFs
         if (!resetn)
             currentState <= ROOT;
-        else
-            currentState <= nextState;
-    end // stateFFs
+        else begin
+            case (currentState)
+                ROOT: begin // choose next location
+                    case (keys)
+                        3'b100: currentState = LOAD_HOME;
+                        3'b001: currentState = LOAD_ARCADE;
+                        default: currentState = ROOT;
+                    endcase
+                end
 
-    // at home: key[1] = arcade
-    // at arcade: key[2] = home
+                // Stay in load state until keys released, load background
+                LOAD_HOME:
+                    currentState = (keys == 3'b0) ? HOME : LOAD_HOME;
+                HOME: begin // choose activity
+                    case (keys)
+                        default: currentState = HOME;
+                    endcase
+                end
+
+                // Stay in load state until keys released, load background
+                LOAD_ARCADE:
+                    currentState = (keys == 3'b0) ? ARCADE : LOAD_ARCADE;
+                ARCADE: begin // choose activity
+                    case (keys)
+                        default: currentState = ARCADE;
+                    endcase
+                end
+
+                // Default to ROOT state
+                default:
+                    currentState = ROOT;
+            endcase
+        end
+    end // stateFFs
 endmodule

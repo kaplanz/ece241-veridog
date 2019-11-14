@@ -11,10 +11,12 @@ module veridog(
     input [3:0] KEY,            // On Board Keys
     input [9:0] SW,             // On Board Switches
 
+    // -- DEBUG --
     output [6:0] HEX0, HEX1,    // On Board HEX
     // output [6:0] HEX2, HEX3,
     // output [6:0] HEX4, HEX5,
     // output [9:0] LEDR,          // On Board LEDs
+    // -----------
 
     // The ports below are for the VGA output.
     output VGA_CLK,             // VGA Clock
@@ -93,10 +95,13 @@ module veridog(
     wire dHome, dArcade;
 
     // Drawing modules
+    // Home
     draw160x120 drawHome(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start & (location == HOME)),
+        .xInit(8'b0),
+        .yInit(7'b0),
         .xOut(xHome),
         .yOut(yHome),
         .colour(cHome),
@@ -104,6 +109,8 @@ module veridog(
         .done(dHome)
     );
     defparam drawHome.IMAGE = "assets/home.mif";
+
+    // Arcade
     draw160x120 drawArcade(
         .resetn(resetn),
         .clk(CLOCK_50),
@@ -120,6 +127,7 @@ module veridog(
     assign writeEn = (wHome | wArcade); // update for each draw module
     assign done = (dHome | dArcade); // update for each draw module
 
+    // VGA signal mux
     always @(*)
     begin: vgaSignals
         case (location)
@@ -143,11 +151,11 @@ module veridog(
 
 
     // -- DEBUG --
-    seg7 hex1(location, HEX1);
-    seg7 hex0(activity, HEX0);
-
     // seg7 hex5(x, HEX5);
     // seg7 hex4(y, HEX4);
+    seg7 hex1(location, HEX1);
+    seg7 hex0(activity, HEX0);
     // assign LEDR[9] = start;
     // assign LEDR[8] = writeEn;
+    // -----------
 endmodule

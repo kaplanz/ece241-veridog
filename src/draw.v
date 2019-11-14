@@ -10,6 +10,8 @@ module draw160x120(
     input resetn,
     input clk,
     input start,
+    input [8:0] xInit,
+    input [7:0] yInit,
 
     output [7:0] xOut,
     output [6:0] yOut,
@@ -33,16 +35,16 @@ module draw160x120(
         .done(done)
     );
 
-    // Image memory rom for retrieving colour
+    // Assign outputs
+    assign xOut = (xInit + x);
+    assign yOut = (yInit + y);
+
+    // Image memory ROM for retrieving colour
     rom160x120 ROM(
         .address((160 * y) + x),
         .clock(clk),
         .q(colour));
     defparam ROM.init_file = IMAGE;
-
-    // Position outputs
-    assign xOut = (8'b0 + x);
-    assign yOut = (7'b0 + y);
 endmodule
 
 
@@ -75,16 +77,16 @@ module draw40x40(
         .done(done)
     );
 
-    // Image memory rom for retrieving colour
+    // Assign outputs
+    assign xOut = (yInit + x);
+    assign yOut = (xInit + y);
+
+    // Image memory ROM for retrieving colour
     rom160x120 ROM(
         .address((40 * y) + x),
         .clock(clk),
         .q(colour));
     defparam ROM.init_file = IMAGE;
-
-    // Assign outputs
-    assign xOut = (xInit + x);
-    assign yOut = (yInit + y);
 endmodule
 
 
@@ -104,15 +106,18 @@ module iterator #(
     output done
     );
 
-
-    // State registers
-    reg [1:0] currentState;
-
+    // Declare state values
     localparam  IDLE    = 2'h0,
                 LOAD    = 2'h1,
                 WRITE   = 2'h2,
                 DONE    = 2'h3;
 
+    // State register
+    reg [1:0] currentState;
+
+    // Assign outputs
+    assign writeEn = (currentState == WRITE);
+    assign done = (y == Y_MAX);
 
     // Update state registers, perform incremental logic
     always @(posedge clk)
@@ -152,9 +157,4 @@ module iterator #(
             endcase
         end
     end // stateFFs
-
-
-    // Assign outputs
-    assign writeEn = (currentState == WRITE);
-    assign done = (y == Y_MAX);
 endmodule
