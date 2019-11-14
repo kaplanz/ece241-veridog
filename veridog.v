@@ -7,23 +7,24 @@
 //
 
 module veridog(
-    input CLOCK_50,         // On Board 50 MHz
-    input [3:0] KEY,        // On Board Keys
-    input [9:0] SW,         // On Board Switches
+    input CLOCK_50,             // On Board 50 MHz
+    input [3:0] KEY,            // On Board Keys
+    input [9:0] SW,             // On Board Switches
 
-    output [6:0] HEX0, HEX1,// On Board HEX
-//	 output [6:0] HEX2, HEX3,
-//	 output [6:0] HEX4, HEX5,
-	 output [9:0] LEDR,      // On Board LEDs
-	 
-    output VGA_CLK,         // VGA Clock
-    output VGA_HS,          // VGA H_SYNC
-    output VGA_VS,          // VGA V_SYNC
-    output VGA_BLANK_N,     // VGA BLANK
-    output VGA_SYNC_N,      // VGA SYNC
-    output [7:0] VGA_R,     // VGA Red[9:0]
-    output [7:0] VGA_G,     // VGA Green[9:0]
-    output [7:0] VGA_B      // VGA Blue[9:0]
+    output [6:0] HEX0, HEX1,    // On Board HEX
+    // output [6:0] HEX2, HEX3,
+    // output [6:0] HEX4, HEX5,
+    // output [9:0] LEDR,          // On Board LEDs
+
+    // The ports below are for the VGA output.
+    output VGA_CLK,             // VGA Clock
+    output VGA_HS,              // VGA H_SYNC
+    output VGA_VS,              // VGA V_SYNC
+    output VGA_BLANK_N,         // VGA BLANK
+    output VGA_SYNC_N,          // VGA SYNC
+    output [7:0] VGA_R,         // VGA Red[9:0]
+    output [7:0] VGA_G,         // VGA Green[9:0]
+    output [7:0] VGA_B          // VGA Blue[9:0]
     );
 
     // Reset signal
@@ -40,25 +41,25 @@ module veridog(
     // Define the number of colours as well as the initial background
     // image file (.MIF) for the controller.
     vga_adapter VGA(
-            .resetn(resetn),
-            .clock(CLOCK_50),
-            .colour(colour),
-            .x(x),
-            .y(y),
-            .plot(writeEn),
-            /* Signals for the DAC to drive the monitor. */
-            .VGA_R(VGA_R),
-            .VGA_G(VGA_G),
-            .VGA_B(VGA_B),
-            .VGA_HS(VGA_HS),
-            .VGA_VS(VGA_VS),
-            .VGA_BLANK(VGA_BLANK_N),
-            .VGA_SYNC(VGA_SYNC_N),
-            .VGA_CLK(VGA_CLK));
-        defparam VGA.RESOLUTION = "160x120";
-        defparam VGA.MONOCHROME = "FALSE";
-        defparam VGA.BITS_PER_COLOUR_CHANNEL = 2;
-		  defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
+        .resetn(resetn),
+        .clock(CLOCK_50),
+        .colour(colour),
+        .x(x),
+        .y(y),
+        .plot(writeEn),
+        /* Signals for the DAC to drive the monitor. */
+        .VGA_R(VGA_R),
+        .VGA_G(VGA_G),
+        .VGA_B(VGA_B),
+        .VGA_HS(VGA_HS),
+        .VGA_VS(VGA_VS),
+        .VGA_BLANK(VGA_BLANK_N),
+        .VGA_SYNC(VGA_SYNC_N),
+        .VGA_CLK(VGA_CLK));
+    defparam VGA.RESOLUTION = "160x120";
+    defparam VGA.MONOCHROME = "FALSE";
+    defparam VGA.BITS_PER_COLOUR_CHANNEL = 2;
+    defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
     // -- Local parameters --
@@ -115,10 +116,9 @@ module veridog(
     );
     defparam drawArcade.IMAGE = "assets/arcade.mif";
 
-
     // VGA signal assignments
-    assign writeEn = (wHome | wArcade); // Update for each draw module
-    assign done = (dHome | dArcade); // Update for each draw module
+    assign writeEn = (wHome | wArcade); // update for each draw module
+    assign done = (dHome | dArcade); // update for each draw module
 
     always @(*)
     begin: vgaSignals
@@ -128,11 +128,11 @@ module veridog(
                 y <= yHome;
                 colour <= cHome;
             end
-				ARCADE: begin
+            ARCADE: begin
                 x <= xHome;
                 y <= yHome;
                 colour <= cHome;
-				end
+            end
             default: begin
                 x <= 8'bz;
                 y <= 7'bz;
@@ -145,9 +145,9 @@ module veridog(
     // -- DEBUG --
     seg7 hex1(location, HEX1);
     seg7 hex0(activity, HEX0);
-	 
-//	 seg7 hex5(x, HEX5);
-//	 seg7 hex4(y, HEX4);
-//	 assign LEDR[9] = start;
-//	 assign LEDR[8] = writeEn;
+
+    // seg7 hex5(x, HEX5);
+    // seg7 hex4(y, HEX4);
+    // assign LEDR[9] = start;
+    // assign LEDR[8] = writeEn;
 endmodule

@@ -81,7 +81,7 @@ module navigation(
         else
             currentState <= nextState;
     end // stateFFs
-	 
-	 // at home: key[1] = arcade
-	 // at arcade: key[2] = home
+
+    // at home: key[1] = arcade
+    // at arcade: key[2] = home
 endmodule

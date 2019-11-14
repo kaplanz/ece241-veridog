@@ -82,7 +82,7 @@ module draw40x40(
         .q(colour));
     defparam ROM.init_file = IMAGE;
 
-    // Position outputs
+    // Assign outputs
     assign xOut = (xInit + x);
     assign yOut = (yInit + y);
 endmodule
@@ -114,85 +114,47 @@ module iterator #(
                 DONE    = 2'h3;
 
 
-//    // Drawing state table
-//    always @(*)
-//    begin: stateTable
-//        case (currentState)
-//            IDLE: nextState = (start) ? LOAD: IDLE;
-//            LOAD: nextState = WRITE;
-//            WRITE: nextState = (~done) ? LOAD : DONE;
-//            DONE: nextState = (start) ? DONE : IDLE;
-//            default: nextState = IDLE;
-//        endcase
-//    end // stateTable
-
-
-//    // Perform state functions
-//    always @(*)
-//    begin: stateFunctions
-//        case (currentState)
-//            LOAD: begin
-//                x = x + {{X_WIDTH-1{1'b0}}, 1'b1};
-//                if (x == X_MAX) begin
-//                    x = {X_WIDTH{1'b0}};
-//                    y = y + {{Y_WIDTH-1{1'b0}}, 1'b1};
-//
-//                    if (y == Y_MAX) begin
-//                        done = 1'b1;
-//                    end
-//                end
-//            end
-//            WRITE: writeEn = 1'b1;
-//            DONE: done = 1'b1;
-//            default: begin
-//                x = {X_WIDTH{1'b0}};
-//                y = {Y_WIDTH{1'b0}};
-//                writeEn = 1'b0;
-//                done = 1'b0;
-//            end
-//        endcase
-//    end // stateFunctions
-
-
-    // Update state registers
+    // Update state registers, perform incremental logic
     always @(posedge clk)
     begin: stateFFs
-		if (!resetn) begin
-			currentState <= IDLE;
-		end
-		else begin
-			case (currentState)
-				IDLE: begin
-					currentState <= (start) ? WRITE: IDLE;
-					x <= 0;
-					y <= 0;
-				end
-					
-				WRITE:
-					currentState <= (~done) ? LOAD : DONE;
-				
-				LOAD: begin
-					if(x == X_MAX - 1) begin
-						x <= 0;
-						y <= y + 1;
-					end
-					else begin
-						x <= x + 1;
-					end
-					
-					currentState <= WRITE;
-				end
-				
-				DONE:
-					currentState <= (start) ? DONE : IDLE;
-					
-				default:
-					currentState <= IDLE;
-					
-			endcase
-		end
+        if (!resetn) begin
+            currentState <= IDLE;
+        end
+        else begin
+            case (currentState)
+                IDLE: begin
+                    currentState <= (start) ? WRITE: IDLE;
+                    x <= {X_WIDTH{1'b0}}; // reset x
+                    y <= {Y_WIDTH{1'b0}}; // reset y
+                end
+
+                WRITE:
+                    currentState <= (~done) ? LOAD : DONE;
+
+                LOAD: begin
+                    if(x == X_MAX - 1) begin
+                        x <= {X_WIDTH{1'b0}}; // reset x
+                        y <= y + {{Y_WIDTH-1{1'b0}}, 1'b1}; // increment y
+                    end
+                    else begin
+                        x <= x + {{X_WIDTH-1{1'b0}}, 1'b1}; // increment x
+                    end
+
+                    currentState <= WRITE;
+                end
+
+                DONE:
+                    currentState <= (start) ? DONE : IDLE;
+
+                default:
+                    currentState <= IDLE;
+
+            endcase
+        end
     end // stateFFs
-	 
-	 assign writeEn = (currentState == WRITE);
-	 assign done = (y == Y_MAX);
+
+
+    // Assign outputs
+    assign writeEn = (currentState == WRITE);
+    assign done = (y == Y_MAX);
 endmodule
