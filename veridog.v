@@ -137,9 +137,9 @@ module veridog(
                 colour <= cHome;
             end
             ARCADE: begin
-                x <= xHome;
-                y <= yHome;
-                colour <= cHome;
+                x <= xArcade;
+                y <= yArcade;
+                colour <= cArcade;
             end
             default: begin
                 x <= 8'bz;
