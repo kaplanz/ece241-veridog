@@ -6,8 +6,8 @@
 //  Copyright © 2019 Alex Lehner. All rights reserved.
 //
 
-module hungerCounter(hunger, eating, fullLevel);
-    input hunger;
+module hungerCounter(slowClk, eating, fullLevel);
+    input slowClk;
     inout eating;
     output reg [6:0] fullLevel;
 
@@ -16,7 +16,7 @@ module hungerCounter(hunger, eating, fullLevel);
     reg hungerLoss = 1'd1;
     reg [2:0] eatingCount = 0;
 
-    always @(negedge hunger)
+    always @(negedge slowCkk)
     begin
         if (eating)
         begin
@@ -37,7 +37,7 @@ module hungerCounter(hunger, eating, fullLevel);
 endmodule
 
 
-module tirednessCounter(tiredness, sleeping, sleepLevel);
+module tirednessCounter(slowClk, sleeping, sleepLevel);
     input tiredness;
     inout sleeping;
     output reg [6:0] sleepLevel;
@@ -47,7 +47,7 @@ module tirednessCounter(tiredness, sleeping, sleepLevel);
     reg tiredLoss = 1'd1;
     reg [2:0] sleepingCount = 0;
 
-    always @(negedge tiredness)
+    always @(negedge slowClk)
     begin
         if (sleeping)
         begin
