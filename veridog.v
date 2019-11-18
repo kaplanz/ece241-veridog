@@ -66,9 +66,13 @@ module veridog(
 
     // -- Local parameters --
     // Locations
-    localparam  ROOT     = 4'h0,
-                HOME     = 4'h1,
-                ARCADE   = 4'h2;
+    localparam  ROOT    = 4'h0,
+                HOME    = 4'h1,
+                ARCADE  = 4'h2;
+    // Activities
+    localparam  IDLE    = 4'h1,
+                EAT     = 4'h2,
+                SLEEP   = 4'h3;
 
 
     // -- Control --
@@ -87,6 +91,7 @@ module veridog(
 
 
     // -- VGA --
+    // -- Background --
     // Drawing wires
     wire [7:0] xHome, xArcade;
     wire [6:0] yHome, yArcade;
@@ -96,7 +101,7 @@ module veridog(
 
     // Drawing modules
     // Home
-    draw160x120 drawHome(
+    draw drawHome(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start & (location == HOME)),
@@ -111,7 +116,7 @@ module veridog(
     defparam drawHome.IMAGE = "assets/home.mif";
 
     // Arcade
-    draw160x120 drawArcade(
+    draw drawArcade(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start & (location == ARCADE)),
@@ -124,12 +129,33 @@ module veridog(
     defparam drawArcade.IMAGE = "assets/arcade.mif";
 
     // VGA signal assignments
-    assign writeEn = (wHome | wArcade); // update for each draw module
-    assign done = (dHome | dArcade); // update for each draw module
+    assign writeEn = (wHome | wArcade); // update for each background
+    assign doneBg = (dHome | dArcade); // update for each backgroun
 
-    // VGA signal mux
-    always @(*)
-    begin: vgaSignals
+    // -- Foreground --
+    // Drawing wires
+    wire [7:0] xDog;
+    wire [6:0] yDog;
+    wire [7:0] cDog;
+    wire wDog;
+    wire dDog;
+
+    // Drawing modules
+    // Dog
+    draw #(6, 6, 40, 40) drawDog(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .start(doneBg),
+        .xOut(xDog),
+        .yOut(yDog),
+        .colour(cDog),
+        .writeEn(wDog),
+        .done(dDog)
+    );
+
+    // -- VGA Inputs --
+    always @(posedge start)
+    begin: vgaBgSignals
         case (location)
             HOME: begin
                 x <= xHome;
@@ -147,7 +173,23 @@ module veridog(
                 colour <= 8'bz;
             end
         endcase
-    end // vgaSignals
+    end // vgaBgSignals
+
+    always @(posedge doneBg)
+    begin: vgaFgSignals
+        case (activity)
+            IDLE: begin
+                x <= xDog;
+                y <= yDog;
+                colour <= cDog;
+            end
+            default: begin
+                x <= 8'bz;
+                y <= 7'bz;
+                colour <= 8'bz;
+            end
+        endcase
+    end // vgaFgSignals
 
 
     // -- DEBUG --
