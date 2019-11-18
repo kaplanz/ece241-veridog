@@ -17,10 +17,12 @@ module navigation(
 
     // Declare state values
     localparam  ROOT        = {1'b0, 8'h00},
-                LOAD_HOME   = {1'b1, 8'h10},
-                LOAD_ARCADE = {1'b1, 8'h20},
+                GO_HOME   = {1'b1, 8'h10},
+                GO_ARCADE = {1'b1, 8'h20},
 
                 HOME        = {1'b0, 8'h10},
+                EAT         = {1'b0, 8'h11},
+                SLEEP       = {1'b0, 8'h12},
 
                 ARCADE      = {1'b0, 8'h20};
 
@@ -41,26 +43,30 @@ module navigation(
             case (currentState)
                 ROOT: begin // choose next location
                     case (keys)
-                        3'b100: currentState = LOAD_HOME;
-                        3'b001: currentState = LOAD_ARCADE;
+                        3'b100: currentState = GO_HOME;
+                        3'b001: currentState = GO_ARCADE;
                         default: currentState = ROOT;
                     endcase
                 end
 
                 // Stay in load state until keys released, load background
-                LOAD_HOME:
-                    currentState = (keys == 3'b0) ? HOME : LOAD_HOME;
+                GO_HOME:
+                    currentState = (keys == 3'b0) ? HOME : GO_HOME;
                 HOME: begin // choose activity
                     case (keys)
+                        3'b100: currentState = EAT;
+                        3'b010: currentState = SLEEP;
+                        3'b001: currentState = GO_ARCADE;
                         default: currentState = HOME;
                     endcase
                 end
 
                 // Stay in load state until keys released, load background
-                LOAD_ARCADE:
-                    currentState = (keys == 3'b0) ? ARCADE : LOAD_ARCADE;
+                GO_ARCADE:
+                    currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
                 ARCADE: begin // choose activity
                     case (keys)
+                        3'b001: currentState = GO_HOME;
                         default: currentState = ARCADE;
                     endcase
                 end
