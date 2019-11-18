@@ -98,6 +98,10 @@ module veridog(
     wire [7:0] cHome, cArcade;
     wire wHome, wArcade;
     wire dHome, dArcade;
+    wire doneBg;
+
+    // Output signals
+    assign doneBg = (dHome | dArcade); // update for each background
 
     // Drawing modules
     // Home
@@ -128,10 +132,6 @@ module veridog(
     );
     defparam drawArcade.IMAGE = "assets/arcade.mif";
 
-    // VGA signal assignments
-    assign writeEn = (wHome | wArcade); // update for each background
-    assign doneBg = (dHome | dArcade); // update for each backgroun
-
     // -- Foreground --
     // Drawing wires
     wire [7:0] xDog;
@@ -139,6 +139,9 @@ module veridog(
     wire [7:0] cDog;
     wire wDog;
     wire dDog;
+
+    // Output signals
+    assign done = (doneDog); // update for each foreground
 
     // Drawing modules
     // Dog
@@ -153,7 +156,9 @@ module veridog(
         .done(dDog)
     );
 
-    // -- VGA Inputs --
+    // -- Inputs --
+    assign writeEn = (wHome | wArcade); // update for each background
+
     always @(posedge start)
     begin: vgaBgSignals
         case (location)

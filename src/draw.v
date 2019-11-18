@@ -10,7 +10,8 @@ module draw #(
     parameter   X_WIDTH = 8,
                 Y_WIDTH = 7,
                 X_MAX = 160,
-                Y_MAX = 120) (
+                Y_MAX = 120,
+    parameter IMAGE = "assets/black.mif") (
 
     input resetn,
     input clk,
@@ -25,7 +26,6 @@ module draw #(
     output done
     );
 
-    parameter IMAGE = "assets/black.mif";
 
     // Iterator
     wire [X_WIDTH-1:0] x;
