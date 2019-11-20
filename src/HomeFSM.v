@@ -7,11 +7,11 @@
 
 
 module homeFSM(keys, resetn, leaveHome, clk, sleeping, eating, doneAction);
-    input [3:0] keys;
+    input [2:0] keys;
     input clk;
-    inout resetn;
+    input resetn;
     output reg leaveHome = 1'b0;
-    output sleeping, eating;
+    output reg sleeping, eating;
 
     reg [3:0] currentState;
     input doneAction;
@@ -24,42 +24,41 @@ module homeFSM(keys, resetn, leaveHome, clk, sleeping, eating, doneAction);
 
 
     always@(posedge clk)
-    begin: State FFs
-        if(!resetn) begin
+    begin: stateFFs
+        if (!resetn) begin
                 currentState <= RESET;
         end
         else  begin
-            case(currentState)
+            case (currentState)
                 IDLE: begin
-                    sleeping = 1'b0;
-                    eating = 1'b0;
-                    leaveHome = 1'b0;
-                     case(keys)
-                        4'b0001: currentState = RESET;
-                        4'b0010: currentState = LEAVE;
-                        4'b0100: currentState = SLEEP;
-                        4'b1000: currentState = EAT;
-                         default: currentState = IDLE;
+                    sleeping <= 1'b0;
+                    eating <= 1'b0;
+                    leaveHome <= 1'b0;
+                     case({keys, resetn})
+                        4'b0001: currentState <= RESET;
+                        4'b0010: currentState <= LEAVE;
+                        4'b0100: currentState <= SLEEP;
+                        4'b1000: currentState <= EAT;
+                         default: currentState <= IDLE;
                     endcase
                     end
                 SLEEP: begin
-                    sleeping = 1'b1;
-                    currentState = (doneAction == 1'b1) ? IDLE:SLEEP;
+                    sleeping <= 1'b1;
+                    currentState= (doneAction == 1'b1) ? IDLE:SLEEP;
                 end
                 EAT: begin
-                     eating =1'b1;
-                     currentState = (doneAction == 1'b1) ? IDLE: EAT;
+                     eating <=1'b1;
+                     currentState <= (doneAction == 1'b1) ? IDLE: EAT;
                  end
                 LEAVE: begin
-                    leaveHome = 1'b1;
-                    currentState = IDLE;
+                    leaveHome <= 1'b1;
+                    currentState <= IDLE;
                 end
                 RESET: begin
-                    resetn = 1'b1;
-                    currentState = IDLE;
+                    currentState <= IDLE;
                 end
 
-                default: currentState = IDLE;
+                default: currentState <= IDLE;
 
             endcase
         end

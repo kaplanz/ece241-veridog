@@ -6,9 +6,10 @@
 //  Copyright © 2019 Alex Lehner. All rights reserved.
 //
 
-module hungerCounter(slowClk, eating, fullLevel);
+module hungerCounter(slowClk, eating, doneEating, fullLevel);
     input slowClk;
-    inout eating;
+    input eating;
+    output reg doneEating = 1'b0;
     output reg [6:0] fullLevel;
 
     reg [6:0] fullBar = 7'd100; // the maximum level you can eat to
@@ -16,15 +17,16 @@ module hungerCounter(slowClk, eating, fullLevel);
     reg hungerLoss = 1'd1;
     reg [2:0] eatingCount = 0;
 
-    always @(negedge slowCkk)
+    always @(negedge slowClk)
     begin
         if (eating)
         begin
             if (fullLevel + eatingIncrease > fullBar || eatingCount > 4'd5)
             begin
-                eating = 0;
-                eatingCount =0;
+                doneEating <= 1;
+                eatingCount <=0;
             end
+            doneEating <=0;
             fullLevel <= fullLevel + eatingIncrease;
             eatingCount <= eatingCount + 1'd1;
         end
@@ -37,9 +39,11 @@ module hungerCounter(slowClk, eating, fullLevel);
 endmodule
 
 
-module tirednessCounter(slowClk, sleeping, sleepLevel);
+module tirednessCounter(slowClk, sleeping,doneSleeping, sleepLevel);
     input tiredness;
-    inout sleeping;
+    input sleeping;
+    output reg doneSleeping = 1'b0;
+    input slowClk;
     output reg [6:0] sleepLevel;
 
     reg [6:0] fullBar = 7'd100; // the maximum level you can eat to
@@ -51,17 +55,18 @@ module tirednessCounter(slowClk, sleeping, sleepLevel);
     begin
         if (sleeping)
         begin
-            if (sleepLevel + sleepingIncrease > fullBar || sleepCount > 4'd5)
+            if (sleepLevel + sleepingIncrease > fullBar || sleepingCount > 4'd5)
             begin
-                sleeping = 0;
-                sleepCount =0;
+                doneSleeping <= 1;
+                sleepingCount <=0;
             end
             sleepLevel <= sleepLevel + sleepingIncrease;
             sleepingCount <= sleepingCount + 1'd1;
+            doneSleeping <=1'b0;
         end
         if (!sleeping)
         begin
-            if (sleepingLevel > 0)
+            if (sleepLevel > 0)
                 sleepLevel <= sleepLevel - tiredLoss;
         end
     end
