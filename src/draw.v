@@ -16,8 +16,8 @@ module draw #(
     input resetn,
     input clk,
     input start,
-    input [8:0] xInit,
-    input [7:0] yInit,
+    input [7:0] xInit,
+    input [6:0] yInit,
 
     output [7:0] xOut,
     output [6:0] yOut,
@@ -112,11 +112,10 @@ module iterator #(
                 end
 
                 DONE:
-                    currentState <= (start) ? DONE : IDLE;
+                    currentState <= (~start) ? IDLE : DONE;
 
                 default:
                     currentState <= IDLE;
-
             endcase
         end
     end // stateFFs

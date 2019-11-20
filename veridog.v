@@ -33,9 +33,9 @@ module veridog(
     wire resetn = KEY[3];
 
     // VGA wires
-    reg [7:0] x;
-    reg [6:0] y;
-    reg [7:0] colour;
+    wire [7:0] x;
+    wire [6:0] y;
+    wire [7:0] colour;
     wire writeEn;
     wire done;
 
@@ -89,6 +89,22 @@ module veridog(
         .activity(activity)
     );
 
+    // Stats
+    wire divEn;
+    statsSlowCounter DIV(CLOCK_50, divEn);
+
+    wire eatEn;
+    wire doneEat;
+
+    wire [6:0] hunger;
+
+    hungerCounter HUNGER(
+        .slowClk(divEn),
+        .eating(eatEn),
+        .doneEating(doneEat),
+        .fullLevel(hunger)
+    );
+
 
     // -- VGA --
     // -- Background --
@@ -98,10 +114,6 @@ module veridog(
     wire [7:0] cHome, cArcade;
     wire wHome, wArcade;
     wire dHome, dArcade;
-    wire doneBg;
-
-    // Output signals
-    assign doneBg = (dHome | dArcade); // update for each background
 
     // Drawing modules
     // Home
@@ -109,8 +121,8 @@ module veridog(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start & (location == HOME)),
-        .xInit(8'b0),
-        .yInit(7'b0),
+        .xInit(8'd0),
+        .yInit(7'd0),
         .xOut(xHome),
         .yOut(yHome),
         .colour(cHome),
@@ -124,6 +136,8 @@ module veridog(
         .resetn(resetn),
         .clk(CLOCK_50),
         .start(start & (location == ARCADE)),
+        .xInit(8'd0),
+        .yInit(7'd0),
         .xOut(xArcade),
         .yOut(yArcade),
         .colour(cArcade),
@@ -140,69 +154,150 @@ module veridog(
     wire wDog;
     wire dDog;
 
-    // Output signals
-    assign done = (doneDog); // update for each foreground
-
     // Drawing modules
     // Dog
-    draw #(6, 6, 40, 40) drawDog(
+    draw drawDog(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .start(doneBg),
+        .start(dHome | dArcade), // FIXME
+        .xInit(8'd60),
+        .yInit(7'd80),
         .xOut(xDog),
         .yOut(yDog),
         .colour(cDog),
         .writeEn(wDog),
         .done(dDog)
     );
+    defparam drawDog.X_WIDTH = 6;
+    defparam drawDog.Y_WIDTH = 6;
+    defparam drawDog.X_MAX = 40;
+    defparam drawDog.Y_MAX = 40;
+    defparam drawDog.IMAGE = "assets/dog1.mif";
 
-    // -- Inputs --
-    assign writeEn = (wHome | wArcade); // update for each background
-
-    always @(posedge start)
-    begin: vgaBgSignals
-        case (location)
-            HOME: begin
-                x <= xHome;
-                y <= yHome;
-                colour <= cHome;
-            end
-            ARCADE: begin
-                x <= xArcade;
-                y <= yArcade;
-                colour <= cArcade;
-            end
-            default: begin
-                x <= 8'bz;
-                y <= 7'bz;
-                colour <= 8'bz;
-            end
-        endcase
-    end // vgaBgSignals
-
-    always @(posedge doneBg)
-    begin: vgaFgSignals
-        case (activity)
-            IDLE: begin
-                x <= xDog;
-                y <= yDog;
-                colour <= cDog;
-            end
-            default: begin
-                x <= 8'bz;
-                y <= 7'bz;
-                colour <= 8'bz;
-            end
-        endcase
-    end // vgaFgSignals
+    vgaSignals VGA_SIGNALS(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .start(start),
+        .location(location),
+        .activity(activity),
+        .xHome(xHome), .yHome(yHome), .cHome(cHome), .wHome(wHome), .dHome(dHome),
+        .xArcade(xArcade), .yArcade(yArcade), .cArcade(cArcade), .wArcade(wArcade), .dArcade(dArcade),
+        .xDog(xDog), .yDog(yDog), .cDog(cDog), .wDog(wDog), .dDog(dDog),
+        .x(x),
+        .y(y),
+        .colour(colour),
+        .writeEn(writeEn),
+        .done(done)
+    );
 
 
     // -- DEBUG --
-    // seg7 hex5(x, HEX5);
-    // seg7 hex4(y, HEX4);
+    // seg7 hex5(hunger[6:4], HEX5);
+    // seg7 hex4(hunger[3:0], HEX4);
+    // seg7 hex5(x[3:0], HEX5);
+    // seg7 hex4(y[3:0], HEX4);
     seg7 hex1(location, HEX1);
     seg7 hex0(activity, HEX0);
-    // assign LEDR[9] = start;
+    // assign LEDR[9] = done;
     // assign LEDR[8] = writeEn;
     // -----------
+endmodule
+
+
+module vgaSignals(
+        input resetn,
+        input clk,
+        input start,
+        input [3:0] location, activity,
+        input [7:0] xHome, xArcade, xDog,
+        input [6:0] yHome, yArcade, yDog,
+        input [7:0] cHome, cArcade, cDog,
+        input wHome, wArcade, wDog,
+        input dHome, dArcade, dDog,
+
+        output reg [7:0] x,
+        output reg [6:0] y,
+        output reg [7:0] colour,
+        output writeEn,
+        output done
+    );
+
+    // -- Local parameters --
+    // Locations
+    localparam  ROOT    = 4'h0,
+        HOME    = 4'h1,
+        ARCADE  = 4'h2;
+    // Activities
+    localparam  NONE    = 4'h1,
+        EAT     = 4'h2,
+        SLEEP   = 4'h3;
+
+    // Declare state values
+    localparam  IDLE    = 2'h0,
+        DRAW_BG = 2'h1,
+        DRAW_FG = 2'h2,
+        DONE    = 2'h3;
+
+    // State register
+    reg [1:0] currentState;
+
+    // Internal wires
+    wire doneBg = (dHome | dArcade);
+    wire doneFg = (dDog);
+
+    // Assign outputs
+    assign writeEn = (wHome | wArcade | wDog) & (colour != 8'b001001);
+    assign done = (currentState == DONE);
+
+    // Update state registers, perform incremental logic
+    always @(posedge clk)
+    begin: stateFFs
+        if (!resetn) begin
+            currentState <= IDLE;
+        end
+        else begin
+            case (currentState)
+                IDLE: begin
+                    currentState <= (start) ? DRAW_BG: IDLE;
+                    x <= 8'b0; // reset x
+                    y <= 7'b0; // reset y
+                    colour <= 8'b0; // reset colour
+                end
+
+                DRAW_BG: begin
+                    currentState <= (doneBg) ? DRAW_FG : DRAW_BG;
+                    case (location)
+                        HOME: begin
+                            x <= xHome;
+                            y <= yHome;
+                            colour <= cHome;
+                        end
+                        ARCADE: begin
+                            x <= xArcade;
+                            y <= yArcade;
+                            colour <= cArcade;
+                        end
+                        default: begin
+                            x <= 8'bz;
+                            y <= 7'bz;
+                            colour <= 8'bz;
+                        end
+                    endcase
+                end
+
+                DRAW_FG: begin
+                    currentState <= (doneFg) ? DONE : DRAW_FG;
+                    x <= xDog;
+                    y <= yDog;
+                    colour <= cDog;
+                end
+
+                DONE:
+                    currentState <= (~start) ? IDLE : DONE;
+
+                default:
+                    currentState <= IDLE;
+            endcase
+        end
+    end // stateFFs
 endmodule
