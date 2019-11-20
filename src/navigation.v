@@ -17,8 +17,8 @@ module navigation(
 
     // Declare state values
     localparam  ROOT        = {1'b0, 8'h00},
-                GO_HOME   = {1'b1, 8'h10},
-                GO_ARCADE = {1'b1, 8'h20},
+                GO_HOME     = {1'b1, 8'h10},
+                GO_ARCADE   = {1'b1, 8'h20},
 
                 HOME        = {1'b0, 8'h10},
                 EAT         = {1'b0, 8'h11},
@@ -54,8 +54,8 @@ module navigation(
                     currentState = (keys == 3'b0) ? HOME : GO_HOME;
                 HOME: begin // choose activity
                     case (keys)
-                        3'b100: currentState = EAT;
-                        3'b010: currentState = SLEEP;
+                        // 3'b100: currentState = EAT;
+                        // 3'b010: currentState = SLEEP;
                         3'b001: currentState = GO_ARCADE;
                         default: currentState = HOME;
                     endcase
