@@ -51,7 +51,7 @@ module vgaSignals(
     // Home
     draw DRAW_HOME(
         .resetn(resetn),
-        .clk(CLOCK_50),
+        .clk(clk),
         .start(sHome),
         .xInit(8'd0),
         .yInit(7'd0),
@@ -70,7 +70,7 @@ module vgaSignals(
     // Arcade
     draw DRAW_ARCADE(
         .resetn(resetn),
-        .clk(CLOCK_50),
+        .clk(clk),
         .start(sArcade),
         .xInit(8'd0),
         .yInit(7'd0),
@@ -89,7 +89,7 @@ module vgaSignals(
     // Dog
     draw DRAW_DOG(
         .resetn(resetn),
-        .clk(CLOCK_50),
+        .clk(clk),
         .start(doneBg),
         .xInit(8'd60),
         .yInit(7'd80),
