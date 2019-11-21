@@ -64,23 +64,12 @@ module veridog(
     defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
-    // -- Local parameters --
-    // Locations
-    localparam  ROOT    = 4'h0,
-                HOME    = 4'h1,
-                ARCADE  = 4'h2;
-    // Activities
-    localparam  STAY    = 4'h0,
-                EAT     = 4'h1,
-                SLEEP   = 4'h2;
-
-
     // -- Control --
     // Navigation
     wire start;
     wire [3:0] location, activity;
     wire [2:0] keys = ~KEY[2:0];
-    navigation nav(
+    navigation NAV(
         .resetn(resetn),
         .clk(CLOCK_50),
         .keys(keys),
@@ -92,17 +81,20 @@ module veridog(
     // Stats
     wire divEn;
     rateDivider DIV(CLOCK_50, divEn);
-
-    wire eatEn;
-    wire doneEat;
-
-    wire [6:0] hunger;
-
+    wire startEat, startSleep;
+    wire doneEating, doneSleeping;
+    wire [6:0] hunger, sleep;
     hungerCounter HUNGER(
         .slowClk(divEn),
-        .eating(eatEn),
+        .eating(startEat),
         .doneEating(doneEat),
         .fullLevel(hunger)
+    );
+    sleepCounter SLEEP(
+        .slowClk(divEn),
+        .sleeping(startSleep),
+        .doneSleeping(doneSleep),
+        .fullLevel(sleep)
     );
 
 
@@ -122,14 +114,21 @@ module veridog(
 
 
     // -- DEBUG --
-    // seg7 hex5(hunger[6:4], HEX5);
-    // seg7 hex4(hunger[3:0], HEX4);
-    // seg7 hex5(x[3:0], HEX5);
-    // seg7 hex4(y[3:0], HEX4);
+    // Navigation
     seg7 hex1(location, HEX1);
     seg7 hex0(activity, HEX0);
+
+    // Stats
+    seg7 hex5(hunger[6:4], HEX5);
+    seg7 hex4(hunger[3:0], HEX4);
+    seg7 hex3(hunger[6:4], HEX5);
+    seg7 hex2(hunger[3:0], HEX4);
+
+    // Drawing
     // assign LEDR[9] = done;
     // assign LEDR[8] = writeEn;
+    // seg7 hex5(x[3:0], HEX5);
+    // seg7 hex4(y[3:0], HEX4);
     // -----------
 endmodule
 
