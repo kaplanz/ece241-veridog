@@ -9,9 +9,9 @@
 module draw #(
     parameter   X_WIDTH = 8,
                 Y_WIDTH = 7,
-                X_MAX = 160,
-                Y_MAX = 120,
-                IMAGE = "assets/black.mif"
+                X_MAX   = 160,
+                Y_MAX   = 120,
+                IMAGE   = "assets/black.mif"
     ) (
     input resetn,
     input clk,
@@ -56,8 +56,8 @@ endmodule
 module iterator #(
     parameter   X_WIDTH = 8,
                 Y_WIDTH = 7,
-                X_MAX = 160,
-                Y_MAX = 120
+                X_MAX   = 160,
+                Y_MAX   = 120
     ) (
     input resetn,
     input clk,

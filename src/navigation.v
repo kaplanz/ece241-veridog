@@ -12,7 +12,7 @@ module navigation(
     input [2:0] keys,
 
     output transition,
-    output [3:0] location, activity
+    output [3:0] location, action
     );
 
     // Declare state values
@@ -21,8 +21,8 @@ module navigation(
                 GO_ARCADE   = {1'b1, 8'h20},
 
                 HOME        = {1'b0, 8'h10},
-                EAT         = {1'b0, 8'h11},
-                SLEEP       = {1'b0, 8'h12},
+                EAT         = {1'b1, 8'h11},
+                SLEEP       = {1'b1, 8'h12},
 
                 ARCADE      = {1'b0, 8'h20};
 
@@ -32,7 +32,7 @@ module navigation(
     // Assign outputs
     assign transition = currentState[8]; // transition occurs during wait states
     assign location = currentState[7:4]; // left hex digit encodes location
-    assign activity = currentState[3:0]; // right hex digit encodes activity
+    assign action = currentState[3:0]; // right hex digit encodes action
 
     // Update state registers, perform incremental logic
     always @(posedge clk)
@@ -43,8 +43,7 @@ module navigation(
             case (currentState)
                 ROOT: begin // choose next location
                     case (keys)
-                        3'b100: currentState = GO_HOME;
-                        3'b001: currentState = GO_ARCADE;
+                        3'b001: currentState = GO_HOME;
                         default: currentState = ROOT;
                     endcase
                 end
@@ -52,19 +51,24 @@ module navigation(
                 // Stay in load state until keys released, load background
                 GO_HOME:
                     currentState = (keys == 3'b0) ? HOME : GO_HOME;
-                HOME: begin // choose activity
+                HOME: begin // choose action
                     case (keys)
-                        // 3'b100: currentState = EAT;
-                        // 3'b010: currentState = SLEEP;
+                        3'b100: currentState = EAT;
+                        3'b010: currentState = SLEEP;
                         3'b001: currentState = GO_ARCADE;
                         default: currentState = HOME;
                     endcase
                 end
+                // Home actions
+                EAT:
+                    currentState <= HOME;
+                SLEEP:
+                    currentState <= HOME;
 
                 // Stay in load state until keys released, load background
                 GO_ARCADE:
                     currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
-                ARCADE: begin // choose activity
+                ARCADE: begin // choose action
                     case (keys)
                         3'b001: currentState = GO_HOME;
                         default: currentState = ARCADE;

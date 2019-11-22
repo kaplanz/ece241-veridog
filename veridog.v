@@ -13,9 +13,9 @@ module veridog(
 
     // -- DEBUG --
     output [6:0] HEX0, HEX1,    // On Board HEX
-    // output [6:0] HEX2, HEX3,
-    // output [6:0] HEX4, HEX5,
-    // output [9:0] LEDR,          // On Board LEDs
+    output [6:0] HEX2, HEX3,
+    output [6:0] HEX4, HEX5,
+    output [9:0] LEDR,          // On Board LEDs
     // -----------
 
     // The ports below are for the VGA output.
@@ -64,10 +64,21 @@ module veridog(
     defparam VGA.BACKGROUND_IMAGE = "assets/black.mif";
 
 
+    // -- Local parameters --
+    // Locations
+    localparam  ROOT    = 4'h0,
+                HOME    = 4'h1,
+                ARCADE  = 4'h2;
+    // Actions
+    localparam  STAY    = 4'h0,
+                EAT     = 4'h1,
+                SLEEP   = 4'h2;
+
+
     // -- Control --
     // Navigation
     wire start;
-    wire [3:0] location, activity;
+    wire [3:0] location, action;
     wire [2:0] keys = ~KEY[2:0];
     navigation NAV(
         .resetn(resetn),
@@ -75,26 +86,20 @@ module veridog(
         .keys(keys),
         .transition(start),
         .location(location),
-        .activity(activity)
+        .action(action)
     );
 
     // Stats
-    wire divEn;
-    rateDivider DIV(CLOCK_50, divEn);
-    wire startEat, startSleep;
-    wire doneEating, doneSleeping;
-    wire [6:0] hunger, sleep;
-    hungerCounter HUNGER(
-        .slowClk(divEn),
-        .eating(startEat),
-        .doneEating(doneEat),
-        .fullLevel(hunger)
-    );
-    sleepCounter SLEEP(
-        .slowClk(divEn),
-        .sleeping(startSleep),
-        .doneSleeping(doneSleep),
-        .fullLevel(sleep)
+    wire doneAction;
+    wire [6:0] hunger, sleepiness;
+    homeActions HOME_ACTIONS(
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .doEat(action == EAT), // FIXME
+        .doSleep(action == SLEEP), // FIXME
+        .hunger(hunger),
+        .sleepiness(sleepiness),
+        .done(doneAction)
     );
 
 
@@ -104,7 +109,7 @@ module veridog(
         .clk(CLOCK_50),
         .start(start),
         .location(location),
-        .activity(activity),
+        .action(action),
         .x(x),
         .y(y),
         .colour(colour),
@@ -116,20 +121,18 @@ module veridog(
     // -- DEBUG --
     // Navigation
     seg7 hex1(location, HEX1);
-    seg7 hex0(activity, HEX0);
+    seg7 hex0(action, HEX0);
 
     // Stats
     seg7 hex5(hunger[6:4], HEX5);
     seg7 hex4(hunger[3:0], HEX4);
-    seg7 hex3(hunger[6:4], HEX5);
-    seg7 hex2(hunger[3:0], HEX4);
+    seg7 hex3(sleepiness[6:4], HEX3);
+    seg7 hex2(sleepiness[3:0], HEX2);
 
     // Drawing
-    // assign LEDR[9] = done;
-    // assign LEDR[8] = writeEn;
-    // seg7 hex5(x[3:0], HEX5);
-    // seg7 hex4(y[3:0], HEX4);
+    // assign LEDR[9] = startEat;
+    // assign LEDR[8] = doneEating;
     // -----------
-endmodule
+    endmodule
 
 

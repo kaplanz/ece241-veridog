@@ -10,7 +10,7 @@ module vgaSignals(
         input resetn,
         input clk,
         input start,
-        input [3:0] location, activity,
+        input [3:0] location, action,
 
         output reg [7:0] x,
         output reg [6:0] y,
@@ -32,20 +32,22 @@ module vgaSignals(
 
     // -- Drawing data --
     // Internal wires
+    wire sHome, sArcade, sDog;
     wire [7:0] xHome, xArcade, xDog;
     wire [6:0] yHome, yArcade, yDog;
     wire [7:0] cHome, cArcade, cDog;
     wire wHome, wArcade, wDog;
     wire dHome, dArcade, dDog;
+    wire doneBg, doneFg;
 
     // Start signals
-    wire sHome = (start & (location == HOME));
-    wire sArcade = (start & (location == ARCADE));
-    wire sDog = doneBg;
+    assign sHome = (start & (location == HOME));
+    assign sArcade = (start & (location == ARCADE));
+    assign sDog = doneBg;
 
     // Done signals
-    wire doneBg = (dHome | dArcade);
-    wire doneFg = (dDog);
+    assign doneBg = (dHome | dArcade);
+    assign doneFg = (dDog);
 
     // Module instantiations
     // Home
@@ -90,7 +92,7 @@ module vgaSignals(
     draw DRAW_DOG(
         .resetn(resetn),
         .clk(clk),
-        .start(doneBg),
+        .start(sDog),
         .xInit(8'd60),
         .yInit(7'd80),
         .xOut(xDog),
