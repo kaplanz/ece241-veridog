@@ -45,7 +45,7 @@ module gameActions(
     reg [3:0] currentState;
 
     // Assign outputs
-    assign gameState == currentState;
+    assign gameState = currentState;
     assign done = (currentState == DONE);
 
     // Update state registers, perform incremental logic

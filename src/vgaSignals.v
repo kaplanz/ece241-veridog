@@ -38,19 +38,19 @@ module vgaSignals(
 
     // -- Drawing data --
     // Internal wires
-    wire sHome, sArcade, sGame, sDog, sSpin, sNun, sGimel, sHay, sShin;
-    wire [7:0] xHome, xArcade, xGame, xDog, xSpin, xNun, xGimel, xHay, xShin;
-    wire [6:0] yHome, yArcade, yGame, yDog, ySpin, yNun, yGimel, yHay, yShin;
-    wire [7:0] cHome, cArcade, cGame, cDog, cSpin, cNun, cGimel, cHay, cShin;
-    wire wHome, wArcade, wGame, wDog, wSpin, wNun, wGimel, wHay, wShin;
-    wire dHome, dArcade, dGame, dDog, dSpin, dNun, dGimel, dHay, dShin;
+    wire sHome, sArcade, sGame, sDog, sEat, sSleep, sSpin, sNun, sGimel, sHay, sShin;
+    wire [7:0] xHome, xArcade, xGame, xDog, xEat, xSleep, xSpin, xNun, xGimel, xHay, xShin;
+    wire [6:0] yHome, yArcade, yGame, yDog, yEat, ySleep, ySpin, yNun, yGimel, yHay, yShin;
+    wire [7:0] cHome, cArcade, cGame, cDog, cEat, cSleep, cSpin, cNun, cGimel, cHay, cShin;
+    wire wHome, wArcade, wGame, wDog, wEat, wSleep, wSpin, wNun, wGimel, wHay, wShin;
+    wire dHome, dArcade, dGame, dDog, dEat, dSleep, dSpin, dNun, dGimel, dHay, dShin;
     wire doneBg, doneFg;
 
     // Start signals
     assign sHome = (start & (location == HOME));
     assign sArcade = (start & (location == ARCADE));
-    assign sGame = (start & location == GAME));
-    assign sDog = (doneBg & (activity != GAME)));
+    assign sGame = (start & (location == GAME));
+    assign sDog = (doneBg & (activity != GAME));
     assign sSpin = (doneBg & (activity == GAME));
     assign sNun = (dSpin & (gameState == NUN));
     assign sGimel = (dSpin & (gameState == GIMEL));
@@ -59,7 +59,7 @@ module vgaSignals(
 
     // Done signals
     assign doneBg = (dHome | dArcade | dGame);
-    assign doneFg = (dDog | dSpin | dNun | dGimel | dHay | dShin);
+    assign doneFg = (dDog | dEat | dSleep | dSpin | dNun | dGimel | dHay | dShin);
 
     // Module instantiations
     // Home
@@ -138,6 +138,44 @@ module vgaSignals(
     defparam DRAW_DOG.Y_MAX = 40;
     defparam DRAW_DOG.IMAGE = "assets/dog1.mif";
 
+    // Eat
+    draw DRAW_EAT(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sEat),
+        .xInit(8'd60),
+        .yInit(7'd80),
+        .xOut(xEat),
+        .yOut(yEat),
+        .colour(cEat),
+        .writeEn(wEat),
+        .done(dEat)
+    );
+    defparam DRAW_EAT.X_WIDTH = 6;
+    defparam DRAW_EAT.Y_WIDTH = 6;
+    defparam DRAW_EAT.X_MAX = 40;
+    defparam DRAW_EAT.Y_MAX = 40;
+    defparam DRAW_EAT.IMAGE = "assets/dog-eat.mif";
+
+    // Sleep
+    draw DRAW_SLEEP(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sSleep),
+        .xInit(8'd60),
+        .yInit(7'd80),
+        .xOut(xSleep),
+        .yOut(ySleep),
+        .colour(cSleep),
+        .writeEn(wSleep),
+        .done(dSleep)
+    );
+    defparam DRAW_SLEEP.X_WIDTH = 6;
+    defparam DRAW_SLEEP.Y_WIDTH = 6;
+    defparam DRAW_SLEEP.X_MAX = 40;
+    defparam DRAW_SLEEP.Y_MAX = 40;
+    defparam DRAW_SLEEP.IMAGE = "assets/dog-sleep.mif";
+
     // Spin
     draw DRAW_SPIN(
         .resetn(resetn),
@@ -151,14 +189,14 @@ module vgaSignals(
         .writeEn(wSpin),
         .done(dSpin)
     );
-    defparam DRAW_DOG.X_WIDTH = 6;
-    defparam DRAW_DOG.Y_WIDTH = 6;
-    defparam DRAW_DOG.X_MAX = 40;
-    defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dreidel-spin.mif";
+    defparam DRAW_SPIN.X_WIDTH = 6;
+    defparam DRAW_SPIN.Y_WIDTH = 6;
+    defparam DRAW_SPIN.X_MAX = 40;
+    defparam DRAW_SPIN.Y_MAX = 40;
+    defparam DRAW_SPIN.IMAGE = "assets/dreidel-spin.mif";
 
     // Nun
-    draw DRAW_SPIN(
+    draw DRAW_NUN(
         .resetn(resetn),
         .clk(clk),
         .start(sNun),
@@ -170,14 +208,14 @@ module vgaSignals(
         .writeEn(wNun),
         .done(dNun)
     );
-    defparam DRAW_DOG.X_WIDTH = 6;
-    defparam DRAW_DOG.Y_WIDTH = 6;
-    defparam DRAW_DOG.X_MAX = 40;
-    defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dreidel-nun.mif";
+    defparam DRAW_NUN.X_WIDTH = 6;
+    defparam DRAW_NUN.Y_WIDTH = 6;
+    defparam DRAW_NUN.X_MAX = 40;
+    defparam DRAW_NUN.Y_MAX = 40;
+    defparam DRAW_NUN.IMAGE = "assets/dreidel-nun.mif";
 
     // Gimel
-    draw DRAW_SPIN(
+    draw DRAW_GIMEL(
         .resetn(resetn),
         .clk(clk),
         .start(sGimel),
@@ -189,14 +227,14 @@ module vgaSignals(
         .writeEn(wGimel),
         .done(dGimel)
     );
-    defparam DRAW_DOG.X_WIDTH = 6;
-    defparam DRAW_DOG.Y_WIDTH = 6;
-    defparam DRAW_DOG.X_MAX = 40;
-    defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dreidel-gimel.mif";
+    defparam DRAW_GIMEL.X_WIDTH = 6;
+    defparam DRAW_GIMEL.Y_WIDTH = 6;
+    defparam DRAW_GIMEL.X_MAX = 40;
+    defparam DRAW_GIMEL.Y_MAX = 40;
+    defparam DRAW_GIMEL.IMAGE = "assets/dreidel-gimel.mif";
 
     // Hay
-    draw DRAW_SPIN(
+    draw DRAW_HAY(
         .resetn(resetn),
         .clk(clk),
         .start(sHay),
@@ -208,14 +246,14 @@ module vgaSignals(
         .writeEn(wHay),
         .done(dHay)
     );
-    defparam DRAW_DOG.X_WIDTH = 6;
-    defparam DRAW_DOG.Y_WIDTH = 6;
-    defparam DRAW_DOG.X_MAX = 40;
-    defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dreidel-hay.mif";
+    defparam DRAW_HAY.X_WIDTH = 6;
+    defparam DRAW_HAY.Y_WIDTH = 6;
+    defparam DRAW_HAY.X_MAX = 40;
+    defparam DRAW_HAY.Y_MAX = 40;
+    defparam DRAW_HAY.IMAGE = "assets/dreidel-hay.mif";
 
     // Shin
-    draw DRAW_SPIN(
+    draw DRAW_SHIN(
         .resetn(resetn),
         .clk(clk),
         .start(sShin),
@@ -227,11 +265,11 @@ module vgaSignals(
         .writeEn(wShin),
         .done(dShin)
     );
-    defparam DRAW_DOG.X_WIDTH = 6;
-    defparam DRAW_DOG.Y_WIDTH = 6;
-    defparam DRAW_DOG.X_MAX = 40;
-    defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dreidel-shin.mif";
+    defparam DRAW_SHIN.X_WIDTH = 6;
+    defparam DRAW_SHIN.Y_WIDTH = 6;
+    defparam DRAW_SHIN.X_MAX = 40;
+    defparam DRAW_SHIN.Y_MAX = 40;
+    defparam DRAW_SHIN.IMAGE = "assets/dreidel-shin.mif";
 
 
     // -- Control --
@@ -292,7 +330,7 @@ module vgaSignals(
                                 SPIN: begin
                                     x <= xSpin;
                                     y <= ySpin;
-                                    colour = <= cSpin;
+                                    colour <= cSpin;
                                 end
 
                                 NUN: begin
@@ -304,28 +342,46 @@ module vgaSignals(
                                 GIMEL: begin
                                     x <= xGimel;
                                     y <= yGimel;
-                                    colour = <= cGimel;
+                                    colour <= cGimel;
                                 end
 
                                 HAY: begin
                                     x <= xHay;
                                     y <= yHay;
-                                    colour = <= cHay;
+                                    colour <= cHay;
                                 end
 
                                 SHIN: begin
                                     x <= xShin;
                                     y <= yShin;
-                                    colour = <= cShin;
+                                    colour <= cShin;
                                 end
                             endcase
                         end
 
                         default: begin
-                            currentState <= (doneFg) ? DONE : DRAW_FG;
-                            x <= xDog;
-                            y <= yDog;
-                            colour <= cDog;
+                            case (action)
+                                STAY: begin
+                                    currentState <= (doneFg) ? DONE : DRAW_FG;
+                                    x <= xDog;
+                                    y <= yDog;
+                                    colour <= cDog;
+                                end
+
+                                EAT: begin
+                                    currentState <= (doneFg) ? DONE : DRAW_FG;
+                                    x <= xEat;
+                                    y <= yEat;
+                                    colour <= cEat;
+                                end
+
+                                SLEEP: begin
+                                    currentState <= (doneFg) ? DONE : DRAW_FG;
+                                    x <= xSleep;
+                                    y <= ySleep;
+                                    colour <= cSleep;
+                                end
+                            endcase
                         end
                     endcase
                 end
