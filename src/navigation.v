@@ -11,6 +11,7 @@ module navigation(
     input clk,
     input [2:0] keys,
     input doneAction,
+    input gameEnd,
 
     output transition,
     output [3:0] location, action
@@ -30,7 +31,9 @@ module navigation(
                 ARCADE      = {1'b0, 8'h20},
 
                 DO_GAME     = {1'b1, 8'h30},
-                GAME        = {1'b0, 8'h33};
+                GAME        = {1'b0, 8'h33},
+
+                END         = {1'b0, 8'hFF};
 
     // State register
     reg [8:0] currentState;
@@ -45,6 +48,8 @@ module navigation(
     begin: stateFFs
         if (!resetn)
             currentState <= ROOT;
+        else if (gameEnd)
+            currentState <= END;
         else begin
             case (currentState)
                 ROOT: begin // choose next location
@@ -66,16 +71,16 @@ module navigation(
                 end
                 // Home actions
                 DO_EAT: currentState <= (keys == 3'b0) ? EAT : DO_EAT;
-                EAT: currentState <= GO_HOME;
+                EAT: currentState <= (doneAction) ? GO_HOME : EAT;
                 DO_SLEEP: currentState <= (keys == 3'b0) ? SLEEP : DO_SLEEP;
-                SLEEP: currentState <= GO_HOME;
+                SLEEP: currentState <= (doneAction) ? GO_HOME : SLEEP;
 
                 // Stay in load state until keys released, load background
                 GO_ARCADE: currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
                 ARCADE: begin // choose action
                     case (keys)
-                        3'b001: currentState = GO_HOME;
                         3'b100: currentState = DO_GAME;
+                        3'b001: currentState = GO_HOME;
                         default: currentState = ARCADE;
                     endcase
                 end

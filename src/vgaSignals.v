@@ -325,6 +325,33 @@ module vgaSignals(
 
                 DRAW_FG: begin
                     case (location)
+                        HOME: begin
+                            currentState <= (doneFg) ? DONE : DRAW_FG;
+                            case (action)
+                                STAY: begin
+                                    x <= xDog;
+                                    y <= yDog;
+                                    colour <= cDog;
+                                end
+
+                                EAT: begin
+                                    x <= xEat;
+                                    y <= yEat;
+                                    colour <= cEat;
+                                end
+
+                                SLEEP: begin
+                                    x <= xSleep;
+                                    y <= ySleep;
+                                    colour <= cSleep;
+                                end
+                            endcase
+                        end
+
+                        ARCADE: begin
+                            currentState <= (doneFg) ? DONE : DRAW_FG;
+                        end
+
                         GAME: begin
                             currentState <= (doneFg) ? DONE : DRAW_FG;
                             case (gameState)
@@ -361,28 +388,9 @@ module vgaSignals(
                         end
 
                         default: begin
-                            case (action)
-                                STAY: begin
-                                    currentState <= (doneFg) ? DONE : DRAW_FG;
-                                    x <= xDog;
-                                    y <= yDog;
-                                    colour <= cDog;
-                                end
-
-                                EAT: begin
-                                    currentState <= (doneFg) ? DONE : DRAW_FG;
-                                    x <= xEat;
-                                    y <= yEat;
-                                    colour <= cEat;
-                                end
-
-                                SLEEP: begin
-                                    currentState <= (doneFg) ? DONE : DRAW_FG;
-                                    x <= xSleep;
-                                    y <= ySleep;
-                                    colour <= cSleep;
-                                end
-                            endcase
+                            x <= 8'bz;
+                            y <= 7'bz;
+                            colour <= 8'bz;
                         end
                     endcase
                 end

@@ -86,17 +86,13 @@ module homeActions(
                         currentState <= SLEEP;
                 end
 
-                EAT:
-                    currentState <= (doneAction) ? DONE: EAT;
+                EAT: currentState <= (doneAction) ? DONE: EAT;
 
-                SLEEP:
-                    currentState <= (doneAction) ? DONE: SLEEP;
+                SLEEP: currentState <= (doneAction) ? DONE: SLEEP;
 
-                DONE:
-                    currentState <= (~doAction) ? IDLE : DONE;
+                DONE: currentState <= (~doAction) ? IDLE : DONE;
 
-                default:
-                    currentState <= IDLE;
+                default: currentState <= IDLE;
             endcase
         end
     end // stateFFs

@@ -89,6 +89,7 @@ module veridog(
         .clk(CLOCK_50),
         .keys(keys),
         .doneAction(doneAction),
+        .gameEnd((hunger == 8'b0) & (sleepiness == 8'b0)),
         .transition(startDraw),
         .location(location),
         .action(action)
