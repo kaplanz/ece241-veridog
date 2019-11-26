@@ -9,7 +9,7 @@
 module stat #(
     parameter   MAX         = 100,
                 INCREASE    = 5,
-                DECREASE    = 1;
+                DECREASE    = 1
     ) (
     input resetn,
     input slowClk,
@@ -28,18 +28,18 @@ module stat #(
     always @(posedge slowClk)
     begin
         if (!resetn) begin
-            statLevel <= MAX;
+            statReg <= 8'b0 + MAX;
         end
         if (doingAction) begin
-            if (statLevel + INCREASE > MAX) begin
+            if (statReg + INCREASE > MAX) begin
             end
             else begin
-                statLevel <= statLevel + INCREASE;
+                statReg <= statReg + INCREASE;
             end
         end
         else if (!doingAction) begin
-            if (statLevel > 0)
-                statLevel <= statLevel - DECREASE;
+            if (statReg > 0)
+                statReg <= statReg - DECREASE;
         end
     end
 endmodule
