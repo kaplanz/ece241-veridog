@@ -136,7 +136,7 @@ module vgaSignals(
     defparam DRAW_DOG.Y_WIDTH = 6;
     defparam DRAW_DOG.X_MAX = 40;
     defparam DRAW_DOG.Y_MAX = 40;
-    defparam DRAW_DOG.IMAGE = "assets/dog1.mif";
+    defparam DRAW_DOG.IMAGE = "assets/dog-stay.mif";
 
     // Eat
     draw DRAW_EAT(
