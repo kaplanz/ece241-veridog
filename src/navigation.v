@@ -10,6 +10,7 @@ module navigation(
     input resetn,
     input clk,
     input [2:0] keys,
+    input doneAction,
 
     output transition,
     output [3:0] location, action
@@ -21,10 +22,15 @@ module navigation(
                 GO_ARCADE   = {1'b1, 8'h20},
 
                 HOME        = {1'b0, 8'h10},
-                EAT         = {1'b1, 8'h11},
-                SLEEP       = {1'b1, 8'h12},
+                DO_EAT      = {1'b1, 8'h11},
+                EAT         = {1'b0, 8'h11},
+                DO_SLEEP    = {1'b1, 8'h12},
+                SLEEP       = {1'b0, 8'h12},
 
-                ARCADE      = {1'b0, 8'h20};
+                ARCADE      = {1'b0, 8'h20},
+
+                DO_GAME     = {1'b1, 8'h30},
+                GAME        = {1'b0, 8'h33};
 
     // State register
     reg [8:0] currentState;
@@ -49,35 +55,36 @@ module navigation(
                 end
 
                 // Stay in load state until keys released, load background
-                GO_HOME:
-                    currentState = (keys == 3'b0) ? HOME : GO_HOME;
+                GO_HOME: currentState = (keys == 3'b0) ? HOME : GO_HOME;
                 HOME: begin // choose action
                     case (keys)
-                        3'b100: currentState = EAT;
-                        3'b010: currentState = SLEEP;
+                        3'b100: currentState = DO_EAT;
+                        3'b010: currentState = DO_SLEEP;
                         3'b001: currentState = GO_ARCADE;
                         default: currentState = HOME;
                     endcase
                 end
                 // Home actions
-                EAT:
-                    currentState <= HOME;
-                SLEEP:
-                    currentState <= HOME;
+                DO_EAT: currentState <= (keys == 3'b0) ? EAT : DO_EAT;
+                EAT: currentState <= GO_HOME;
+                DO_SLEEP: currentState <= (keys == 3'b0) ? SLEEP : DO_SLEEP;
+                SLEEP: currentState <= GO_HOME;
 
                 // Stay in load state until keys released, load background
-                GO_ARCADE:
-                    currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
+                GO_ARCADE: currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
                 ARCADE: begin // choose action
                     case (keys)
                         3'b001: currentState = GO_HOME;
+                        3'b100: currentState = DO_GAME;
                         default: currentState = ARCADE;
                     endcase
                 end
+                // Game actions
+                DO_GAME: currentState <= (keys == 3'b0) ? GAME : DO_GAME;
+                GAME: currentState <= (doneAction) ? GO_ARCADE : GAME;
 
                 // Default to ROOT state
-                default:
-                    currentState = ROOT;
+                default: currentState = ROOT;
             endcase
         end
     end // stateFFs

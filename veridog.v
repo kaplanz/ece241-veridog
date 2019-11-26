@@ -68,7 +68,8 @@ module veridog(
     // Locations
     localparam  ROOT    = 4'h0,
                 HOME    = 4'h1,
-                ARCADE  = 4'h2;
+                ARCADE  = 4'h2,
+                GAME    = 4'h3;
     // Actions
     localparam  STAY    = 4'h0,
                 EAT     = 4'h1,
@@ -76,30 +77,46 @@ module veridog(
 
 
     // -- Control --
+    // Internal wires
+    wire doneAction = (doneHomeAction | doneGame);
+
     // Navigation
-    wire start;
+    wire startDraw;
     wire [3:0] location, action;
     wire [2:0] keys = ~KEY[2:0];
     navigation NAV(
         .resetn(resetn),
         .clk(CLOCK_50),
         .keys(keys),
-        .transition(start),
+        .doneAction(doneAction),
+        .transition(startDraw),
         .location(location),
         .action(action)
     );
 
     // Stats
-    wire doneAction;
-    wire [6:0] hunger, sleepiness;
+    wire doneHomeAction;
+    wire [7:0] hunger, sleepiness;
     homeActions HOME_ACTIONS(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .doEat(action == EAT), // FIXME
-        .doSleep(action == SLEEP), // FIXME
+        .doEat(action == EAT),
+        .doSleep(action == SLEEP),
         .hunger(hunger),
         .sleepiness(sleepiness),
-        .done(doneAction)
+        .done(doneHomeAction)
+    );
+
+    // Game
+    wire doneGame;
+    wire [3:0] gameState;
+    gameActions GAME_ACTIONS(
+       .resetn(resetn),
+       .clk(CLOCK_50),
+       .doGame(action == GAME),
+       .randIn({hunger[1], sleepiness[0]}),
+       .gameState(gameState),
+       .done(doneGame)
     );
 
 
@@ -107,9 +124,10 @@ module veridog(
     vgaSignals VGA_SIGNALS(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .start(start),
+        .start(startDraw),
         .location(location),
         .action(action),
+        .gameState(gameState),
         .x(x),
         .y(y),
         .colour(colour),
@@ -124,15 +142,9 @@ module veridog(
     seg7 hex0(action, HEX0);
 
     // Stats
-    seg7 hex5(hunger[6:4], HEX5);
+    seg7 hex5(hunger[7:4], HEX5);
     seg7 hex4(hunger[3:0], HEX4);
-    seg7 hex3(sleepiness[6:4], HEX3);
+    seg7 hex3(sleepiness[7:4], HEX3);
     seg7 hex2(sleepiness[3:0], HEX2);
-
-    // Drawing
-    // assign LEDR[9] = startEat;
-    // assign LEDR[8] = doneEating;
     // -----------
-    endmodule
-
-
+endmodule

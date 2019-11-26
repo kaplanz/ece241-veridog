@@ -1,6 +1,6 @@
 //
-//  HomeActions.v
-//  HomeActions
+//  homeActions.v
+//  homeActions
 //
 //  Created by Alex Lehner on 2019-11-15.
 //  Copyright © 2019 Alex Lehner. All rights reserved.
@@ -34,7 +34,7 @@ module homeActions(
     rateDivider ACTION_DURATION(
         .resetn(~doAction), // reset when not performing action
         .clk(clk),
-        .enable(doneAction), // turns on when action is completed
+        .enable(doneAction) // turns on when action is completed
     );
     defparam ACTION_DURATION.MAX = 250_000_000;
 
@@ -42,7 +42,7 @@ module homeActions(
     rateDivider SLOW_CLK(
         .resetn(resetn),
         .clk(clk),
-        .enable(slowClk),
+        .enable(slowClk)
     );
 
 

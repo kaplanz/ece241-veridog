@@ -1,6 +1,6 @@
 //
 //  gameActions.v
-//  HomeActions
+//  gameActions
 //
 //  Created by Alex Lehner on 2019-11-25.
 //  Copyright © 2019 Alex Lehner. All rights reserved.
@@ -12,7 +12,7 @@ module gameActions(
     input doGame,
     input [1:0] randIn,
 
-    output [3:0] dreidel,
+    output [3:0] gameState,
     output done
     );
 
@@ -45,6 +45,7 @@ module gameActions(
     reg [3:0] currentState;
 
     // Assign outputs
+    assign gameState == currentState;
     assign done = (currentState == DONE);
 
     // Update state registers, perform incremental logic
