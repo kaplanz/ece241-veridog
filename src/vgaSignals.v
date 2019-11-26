@@ -23,7 +23,8 @@ module vgaSignals(
     // Locations
     localparam  ROOT    = 4'h0,
                 HOME    = 4'h1,
-                ARCADE  = 4'h2;
+                ARCADE  = 4'h2,
+                GAME    = 4'h3;
     // Actions
     localparam  STAY    = 4'h0,
                 EAT     = 4'h1,
@@ -50,8 +51,8 @@ module vgaSignals(
     assign sHome = (start & (location == HOME));
     assign sArcade = (start & (location == ARCADE));
     assign sGame = (start & (location == GAME));
-    assign sDog = (doneBg & (activity != GAME));
-    assign sSpin = (doneBg & (activity == GAME));
+    assign sDog = (doneBg & (action != GAME));
+    assign sSpin = (doneBg & (action == GAME));
     assign sNun = (dSpin & (gameState == NUN));
     assign sGimel = (dSpin & (gameState == GIMEL));
     assign sHay = (dSpin & (gameState == HAY));
@@ -336,7 +337,7 @@ module vgaSignals(
                                 NUN: begin
                                     x <= xNun;
                                     y <= yNun;
-                                    colour = <= cNun;
+                                    colour <= cNun;
                                 end
 
                                 GIMEL: begin
