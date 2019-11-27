@@ -42,7 +42,7 @@ module gameActions(
     rateDivider ACTION_DURATION(
         .resetn(~doGame), // reset when not performing action
         .clk(clk),
-        .enable(doneSpin) // turns on when action is completed
+        .out(doneSpin) // turns on when action is completed
     );
     defparam ACTION_DURATION.MAX = 250_000_000;
 

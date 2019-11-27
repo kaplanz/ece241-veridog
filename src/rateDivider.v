@@ -6,7 +6,7 @@
 //  Copyright © 2019 Alex Lehner. All rights reserved.
 //
 
-module rateDivider(input resetn, clk, output enable);
+module rateDivider(input resetn, clk, output out);
     parameter   WIDTH   = 32,
                 MAX     = 50_000_000;
 
@@ -15,7 +15,7 @@ module rateDivider(input resetn, clk, output enable);
     reg [WIDTH-1:0] counter = {WIDTH{1'b0}};
 
     // Assign output
-    assign enable = (counter == MAX);
+    assign out = (counter == MAX);
 
     // Increment counter
     always @(posedge clk)

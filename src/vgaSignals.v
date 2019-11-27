@@ -39,6 +39,15 @@ module vgaSignals(
                 SHIN    = 4'h5;
 
 
+    // -- Base frame rate --
+    wire frameRate;
+    rateDivider FRAME_RATE(
+        .resetn(resetn),
+        .clk(clk),
+        .out(frameRate)
+    );
+
+
     // -- Drawing data --
     // Internal wires
     wire sHome, sArcade, sGame, sEnd, sDog, sEat, sSleep, sSpin, sNun, sGimel, sHay, sShin;
@@ -50,9 +59,10 @@ module vgaSignals(
     wire doneBg, doneFg;
 
     // Start signals
-    assign sHome = (start & (location == HOME));
-    assign sArcade = (start & (location == ARCADE));
-    assign sGame = (start & (location == GAME));
+    wire startFg = (start | frameRate);
+    assign sHome = (startFg & (location == HOME));
+    assign sArcade = (startFg & (location == ARCADE));
+    assign sGame = (startFg & (location == GAME));
     assign sDog = (doneBg & (action != GAME));
     assign sSpin = (doneBg & (action == GAME));
     assign sNun = (dSpin & (gameState == NUN));
