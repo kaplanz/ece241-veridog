@@ -145,9 +145,14 @@ module veridog(
     seg7 hex0(action, HEX0);
 
     // Stats
-    seg7 hex5(hunger[7:4], HEX5);
-    seg7 hex4(hunger[3:0], HEX4);
-    seg7 hex3(sleepiness[7:4], HEX3);
-    seg7 hex2(sleepiness[3:0], HEX2);
+    wire hunger_d1 = (hunger[7:0] / 10) % 10;
+    wire hunger_d0 = hunger[7:0] % 10;
+    seg7 hex5(hunger_d1, HEX5);
+    seg7 hex4(hunger_d0 , HEX4);
+
+    wire sleepiness_d1 = (sleepiness[7:0] / 10) % 10;
+    wire sleepiness_d0 = sleepiness[7:0] % 10;
+    seg7 hex3(sleepiness_d1, HEX3);
+    seg7 hex2(sleepiness_d0, HEX2);
     // -----------
 endmodule
