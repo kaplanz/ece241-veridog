@@ -19,15 +19,15 @@ module navigation(
 
     // Declare state values
     localparam  ROOT        = {1'b0, 8'h00},
-                GO_HOME     = {1'b1, 8'h10},
-                GO_ARCADE   = {1'b1, 8'h20},
 
+                GO_HOME     = {1'b1, 8'h10},
                 HOME        = {1'b0, 8'h10},
                 DO_EAT      = {1'b1, 8'h11},
                 EAT         = {1'b0, 8'h11},
                 DO_SLEEP    = {1'b1, 8'h12},
                 SLEEP       = {1'b0, 8'h12},
 
+                GO_ARCADE   = {1'b1, 8'h20},
                 ARCADE      = {1'b0, 8'h20},
 
                 DO_GAME     = {1'b1, 8'h30},

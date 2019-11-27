@@ -35,8 +35,8 @@ module vgaSignals(
     localparam  SPIN    = 4'h1,
                 NUN     = 4'h2,
                 GIMEL   = 4'h3,
-                HAY     = 4'h3,
-                SHIN    = 4'h4;
+                HAY     = 4'h4,
+                SHIN    = 4'h5;
 
 
     // -- Drawing data --
