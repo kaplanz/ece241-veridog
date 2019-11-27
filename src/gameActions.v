@@ -19,13 +19,13 @@ module gameActions(
 
     // -- Local parameters --
     // Actions
-    localparam  IDLE    = 4'd0,
-                SPIN    = 4'd1,
-                NUN     = 4'd2,
-                GIMEL   = 4'd3,
-                HAY     = 4'd4,
-                SHIN    = 4'd5,
-                DONE    = 4'd6;
+    localparam  IDLE    = 4'h0,
+                SPIN    = 4'h1,
+                NUN     = 4'h2,
+                GIMEL   = 4'h3,
+                HAY     = 4'h4,
+                SHIN    = 4'h5,
+                DONE    = 4'h6;
 
 
     // -- Internal signals --

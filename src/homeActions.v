@@ -18,10 +18,10 @@ module homeActions(
 
     // -- Local parameters --
     // Actions
-    localparam  IDLE    = 4'd0,
-                EAT     = 4'd1,
-                SLEEP   = 4'd2,
-                DONE    = 4'd3;
+    localparam  IDLE    = 4'h0,
+                EAT     = 4'h1,
+                SLEEP   = 4'h2,
+                DONE    = 4'h3;
 
 
     // -- Internal signals --
