@@ -46,6 +46,7 @@ module vgaSignals(
         .clk(clk),
         .out(frameRate)
     );
+    defparam FRAME_RATE.MAX = 10_000_000;
 
 
     // -- Drawing data --
