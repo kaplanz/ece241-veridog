@@ -24,11 +24,13 @@ module vgaSignals(
     localparam  ROOT    = 4'h0,
                 HOME    = 4'h1,
                 ARCADE  = 4'h2,
-                GAME    = 4'h3;
+                GAME    = 4'h3,
+                END     = 4'hF;
     // Actions
     localparam  STAY    = 4'h0,
                 EAT     = 4'h1,
                 SLEEP   = 4'h2;
+             // GAME    = 4'h3
     // Game states
     localparam  SPIN    = 4'h1,
                 NUN     = 4'h2,
@@ -39,12 +41,12 @@ module vgaSignals(
 
     // -- Drawing data --
     // Internal wires
-    wire sHome, sArcade, sGame, sDog, sEat, sSleep, sSpin, sNun, sGimel, sHay, sShin;
-    wire [7:0] xHome, xArcade, xGame, xDog, xEat, xSleep, xSpin, xNun, xGimel, xHay, xShin;
-    wire [6:0] yHome, yArcade, yGame, yDog, yEat, ySleep, ySpin, yNun, yGimel, yHay, yShin;
-    wire [7:0] cHome, cArcade, cGame, cDog, cEat, cSleep, cSpin, cNun, cGimel, cHay, cShin;
-    wire wHome, wArcade, wGame, wDog, wEat, wSleep, wSpin, wNun, wGimel, wHay, wShin;
-    wire dHome, dArcade, dGame, dDog, dEat, dSleep, dSpin, dNun, dGimel, dHay, dShin;
+    wire sHome, sArcade, sGame, sEnd, sDog, sEat, sSleep, sSpin, sNun, sGimel, sHay, sShin;
+    wire [7:0] xHome, xArcade, xEnd, xGame, xDog, xEat, xSleep, xSpin, xNun, xGimel, xHay, xShin;
+    wire [6:0] yHome, yArcade, yEnd, yGame, yDog, yEat, ySleep, ySpin, yNun, yGimel, yHay, yShin;
+    wire [7:0] cHome, cArcade, cEnd, cGame, cDog, cEat, cSleep, cSpin, cNun, cGimel, cHay, cShin;
+    wire wHome, wArcade, wGame, wEnd, wDog, wEat, wSleep, wSpin, wNun, wGimel, wHay, wShin;
+    wire dHome, dArcade, dGame, dEnd, dDog, dEat, dSleep, dSpin, dNun, dGimel, dHay, dShin;
     wire doneBg, doneFg;
 
     // Start signals
@@ -59,10 +61,12 @@ module vgaSignals(
     assign sShin = (dSpin & (gameState == SHIN));
 
     // Done signals
-    assign doneBg = (dHome | dArcade | dGame);
-    assign doneFg = (dDog | dEat | dSleep | dSpin | dNun | dGimel | dHay | dShin);
+    assign doneBg = (dHome | dArcade | dGame | dEnd);
+    assign doneFg = (dDog | dEat | dSleep |
+                     dSpin | dNun | dGimel | dHay | dShin);
 
-    // Module instantiations
+    // -- Module instantiations --
+    // - Background -
     // Home
     draw DRAW_HOME(
         .resetn(resetn),
@@ -114,12 +118,33 @@ module vgaSignals(
         .writeEn(wGame),
         .done(dGame)
     );
-    defparam DRAW_ARCADE.X_WIDTH = 8;
-    defparam DRAW_ARCADE.Y_WIDTH = 7;
-    defparam DRAW_ARCADE.X_MAX = 160;
-    defparam DRAW_ARCADE.Y_MAX = 120;
-    defparam DRAW_ARCADE.IMAGE = "assets/table.mif";
+    defparam DRAW_GAME.X_WIDTH = 8;
+    defparam DRAW_GAME.Y_WIDTH = 7;
+    defparam DRAW_GAME.X_MAX = 160;
+    defparam DRAW_GAME.Y_MAX = 120;
+    defparam DRAW_GAME.IMAGE = "assets/game.mif";
 
+    // End
+    draw DRAW_END(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sEnd),
+        .xInit(8'd0),
+        .yInit(7'd0),
+        .xOut(xEnd),
+        .yOut(yEnd),
+        .colour(cEnd),
+        .writeEn(wEnd),
+        .done(dEnd)
+    );
+    defparam DRAW_END.X_WIDTH = 8;
+    defparam DRAW_END.Y_WIDTH = 7;
+    defparam DRAW_END.X_MAX = 160;
+    defparam DRAW_END.Y_MAX = 120;
+    defparam DRAW_END.IMAGE = "assets/end.mif";
+
+
+    // - Foreground -
     // Dog
     draw DRAW_DOG(
         .resetn(resetn),
@@ -284,7 +309,9 @@ module vgaSignals(
     reg [3:0] currentState;
 
     // Assign outputs
-    assign writeEn = (wHome | wArcade | wGame | wDog | wSpin | wNun | wGimel | wHay | wShin) & (colour != 8'b001001); // ignore "green screen" colour
+    assign writeEn = ((wHome | wArcade | wGame | wEnd | wDog |
+                       wSpin | wNun | wGimel | wHay | wShin) &
+                      (colour != 8'b001001)); // ignore "green screen" colour
     assign done = (currentState == DONE);
 
     // Update state registers, perform incremental logic
@@ -310,11 +337,19 @@ module vgaSignals(
                             y <= yHome;
                             colour <= cHome;
                         end
+
                         ARCADE: begin
                             x <= xArcade;
                             y <= yArcade;
                             colour <= cArcade;
                         end
+
+                        END: begin
+                            x <= xEnd;
+                            y <= yEnd;
+                            colour <= cEnd;
+                        end
+
                         default: begin
                             x <= 8'bz;
                             y <= 7'bz;

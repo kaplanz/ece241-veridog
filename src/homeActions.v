@@ -24,9 +24,12 @@ module homeActions(
                 DONE    = 4'd3;
 
 
-    // -- Internal wires --
+    // -- Internal signals --
+    // State register
+    reg [3:0] currentState;
+
+    // Wires
     wire doAction = (doEat | doSleep);
-    wire doingAction = ((currentState == EAT) | (currentState == SLEEP));
     wire doneAction;
     wire slowClk;
 
@@ -38,7 +41,7 @@ module homeActions(
     );
     defparam ACTION_DURATION.MAX = 250_000_000;
 
-    // Set 1 Hz clock for stats
+    // Set 1Hz clock for stats
     rateDivider SLOW_CLK(
         .resetn(resetn),
         .clk(clk),
@@ -63,9 +66,6 @@ module homeActions(
 
 
     // -- Control --
-    // State register
-    reg [3:0] currentState;
-
     // Assign outputs
     assign done = (currentState == DONE);
 

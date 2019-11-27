@@ -69,16 +69,20 @@ module veridog(
     localparam  ROOT    = 4'h0,
                 HOME    = 4'h1,
                 ARCADE  = 4'h2,
-                GAME    = 4'h3;
+                GAME    = 4'h3,
+                END     = 4'hF;
     // Actions
     localparam  STAY    = 4'h0,
                 EAT     = 4'h1,
                 SLEEP   = 4'h2;
+             // GAME    = 4'h3
 
 
     // -- Control --
     // Internal wires
-    wire doneAction = (doneHomeAction | doneGame);
+    wire [7:0] hunger, sleepiness;
+    wire doneHomeAction, doneGameAction;
+    wire doneAction = (doneHomeAction | doneGameAction);
 
     // Navigation
     wire startDraw;
@@ -96,8 +100,6 @@ module veridog(
     );
 
     // Stats
-    wire doneHomeAction;
-    wire [7:0] hunger, sleepiness;
     homeActions HOME_ACTIONS(
         .resetn(resetn),
         .clk(CLOCK_50),
@@ -117,7 +119,7 @@ module veridog(
        .doGame(action == GAME),
        .randIn({hunger[1], sleepiness[0]}),
        .gameState(gameState),
-       .done(doneGame)
+       .done(doneGameAction)
     );
 
 

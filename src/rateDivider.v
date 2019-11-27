@@ -10,7 +10,8 @@ module rateDivider(input resetn, clk, output enable);
     parameter   WIDTH   = 32,
                 MAX     = 50_000_000;
 
-    // Internal registers
+    // -- Internal signals --
+    // Counter register
     reg [WIDTH-1:0] counter = {WIDTH{1'b0}};
 
     // Assign output
@@ -18,7 +19,7 @@ module rateDivider(input resetn, clk, output enable);
 
     // Increment counter
     always @(posedge clk)
-    begin
+    begin: counterUpdate
         if (!resetn) begin
             counter <= {WIDTH{1'b0}}; // reset counter
         end
@@ -28,5 +29,5 @@ module rateDivider(input resetn, clk, output enable);
                 counter <= {WIDTH{1'b0}}; // reset counter
             end
         end
-    end
+    end // counterUpdate
 endmodule

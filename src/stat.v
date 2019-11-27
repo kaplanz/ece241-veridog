@@ -15,10 +15,11 @@ module stat #(
     input slowClk,
     input doingAction,
 
-    output [6:0] statLevel
+    output [7:0] statLevel
     );
 
-    // Internal register
+    // -- Internal signals --
+    // Stat register
     reg [7:0] statReg = MAX;
 
     // Assign output
@@ -26,20 +27,21 @@ module stat #(
 
     // Perform stat changes
     always @(posedge slowClk)
-    begin
+    begin: statUpdate
         if (!resetn) begin
-            statReg <= 8'b0 + MAX;
+            statReg <= MAX;
         end
-        if (doingAction) begin
+        else if (doingAction) begin
             if (statReg + INCREASE > MAX) begin
+                statReg <= MAX;
             end
             else begin
                 statReg <= statReg + INCREASE;
             end
         end
-        else if (!doingAction) begin
+        else if (~doingAction) begin
             if (statReg > 0)
                 statReg <= statReg - DECREASE;
         end
-    end
+    end // statUpdate
 endmodule

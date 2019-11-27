@@ -27,23 +27,23 @@ module gameActions(
                 DONE    = 4'd6;
 
 
-    // -- Internal wires --
-    wire doingGame = ((currentState != IDLE) & (currentState != DONE));
+    // -- Internal signals --
+    // State register
+    reg [3:0] currentState;
+
+    // Wires
     wire doneSpin;
 
     // Set duration of an action
     rateDivider ACTION_DURATION(
         .resetn(~doGame), // reset when not performing action
         .clk(clk),
-        .enable(doneSpin), // turns on when action is completed
+        .enable(doneSpin) // turns on when action is completed
     );
     defparam ACTION_DURATION.MAX = 250_000_000;
 
 
     // -- Control --
-    // State register
-    reg [3:0] currentState;
-
     // Assign outputs
     assign gameState = currentState;
     assign done = (currentState == DONE);

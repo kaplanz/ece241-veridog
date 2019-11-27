@@ -33,7 +33,7 @@ module navigation(
                 DO_GAME     = {1'b1, 8'h30},
                 GAME        = {1'b0, 8'h33},
 
-                END         = {1'b0, 8'hFF};
+                END         = {1'b1, 8'hFF};
 
     // State register
     reg [8:0] currentState;
