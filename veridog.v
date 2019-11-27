@@ -11,12 +11,10 @@ module veridog(
     input [3:0] KEY,            // On Board Keys
     input [9:0] SW,             // On Board Switches
 
-    // -- DEBUG --
     output [6:0] HEX0, HEX1,    // On Board HEX
     output [6:0] HEX2, HEX3,
     output [6:0] HEX4, HEX5,
     output [9:0] LEDR,          // On Board LEDs
-    // -----------
 
     // The ports below are for the VGA output.
     output VGA_CLK,             // VGA Clock
@@ -113,12 +111,14 @@ module veridog(
     // Game
     wire doneGame;
     wire [3:0] gameState;
+    wire [9:0] gameScore;
     gameActions GAME_ACTIONS(
        .resetn(resetn),
        .clk(CLOCK_50),
        .doGame(action == GAME),
        .randIn({hunger[1], sleepiness[0]}),
        .gameState(gameState),
+       .score(gameScore),
        .done(doneGameAction)
     );
 
@@ -139,10 +139,10 @@ module veridog(
     );
 
 
-    // -- DEBUG --
+    // -- Outputs --
     // Navigation
-    seg7 hex1(location, HEX1);
-    seg7 hex0(action, HEX0);
+    seg7 hex1(location, HEX1); // debug
+    seg7 hex0(action, HEX0); // debug
 
     // Stats
     wire hunger_d1 = (hunger[7:0] / 10) % 10;
@@ -154,5 +154,7 @@ module veridog(
     wire sleepiness_d0 = sleepiness[7:0] % 10;
     seg7 hex3(sleepiness_d1, HEX3);
     seg7 hex2(sleepiness_d0, HEX2);
-    // -----------
+
+    // Game
+    assign LEDR[9:0] = gameScore;
 endmodule

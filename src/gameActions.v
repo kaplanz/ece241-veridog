@@ -13,6 +13,7 @@ module gameActions(
     input [1:0] randIn,
 
     output [3:0] gameState,
+    output [9:0] score,
     output done
     );
 
@@ -31,6 +32,9 @@ module gameActions(
     // State register
     reg [3:0] currentState;
 
+    // Score register
+    reg [9:0] scoreReg = 10'b11111; // start at halfway
+
     // Wires
     wire doneSpin;
 
@@ -45,6 +49,7 @@ module gameActions(
 
     // -- Control --
     // Assign outputs
+    assign score = scoreReg;
     assign gameState = currentState;
     assign done = (currentState == DONE);
 
@@ -56,8 +61,10 @@ module gameActions(
         end
         else begin
             case (currentState)
-                IDLE:
+                IDLE: begin
                     currentState <= (doGame) ? SPIN : IDLE;
+                    // scoreReg <= 10'b0; // reset score after game ends
+                end
 
                 SPIN: begin
                     if (~doneSpin) begin
@@ -73,20 +80,23 @@ module gameActions(
                     end
                 end
 
-                NUN: begin
+                NUN: begin // nun: nothing
                     currentState <= DONE;
                 end
 
-                GIMEL: begin
+                GIMEL: begin // gimel: gain 2
                     currentState <= DONE;
+                    scoreReg <= {score[7:0], 2'b11};
                 end
 
-                HAY: begin
+                HAY: begin // hay: gain 1
                     currentState <= DONE;
+                    scoreReg <= {score[8:0], 1'b1};
                 end
 
-                SHIN: begin
+                SHIN: begin // shin: lose 2
                     currentState <= DONE;
+                    scoreReg <= {2'b00, score[9:2]};
                 end
 
                 DONE:
