@@ -1,4 +1,4 @@
-//
+/
 //  stat.v
 //  Stat bar
 //
@@ -7,8 +7,8 @@
 //
 
 module stat #(
-    parameter   MAX         = 100,
-                INCREASE    = 5,
+    parameter   MAX         = 99,
+                INCREASE    = 3,
                 DECREASE    = 1
     ) (
     input resetn,
@@ -26,7 +26,7 @@ module stat #(
     assign statLevel = statReg;
 
     // Perform stat changes
-    always @(posedge slowClk)
+    always @(posedge slowClk, negedge resetn)
     begin: statUpdate
         if (!resetn) begin
             statReg <= MAX;
@@ -40,8 +40,9 @@ module stat #(
             end
         end
         else if (~doingAction) begin
-            if (statReg > 0)
+            if (statReg > 0) begin
                 statReg <= statReg - DECREASE;
+                end
         end
     end // statUpdate
 endmodule

@@ -7,16 +7,16 @@
 //
 
 module vgaSignals(
-        input resetn,
-        input clk,
-        input start,
-        input [3:0] location, action, gameState,
+    input resetn,
+    input clk,
+    input start,
+    input [3:0] location, action, gameState,
 
-        output reg [7:0] x,
-        output reg [6:0] y,
-        output reg [7:0] colour,
-        output writeEn,
-        output done
+    output reg [7:0] x,
+    output reg [6:0] y,
+    output reg [7:0] colour,
+    output writeEn,
+    output done
     );
 
     // -- Local parameters --
@@ -30,13 +30,15 @@ module vgaSignals(
     localparam  STAY    = 4'h0,
                 EAT     = 4'h1,
                 SLEEP   = 4'h2;
-             // GAME    = 4'h3
+    // GAME    = 4'h3
     // Game states
     localparam  SPIN    = 4'h1,
                 NUN     = 4'h2,
                 GIMEL   = 4'h3,
                 HAY     = 4'h4,
-                SHIN    = 4'h5;
+                SHIN    = 4'h5,
+                WIN     = 4'h7,
+                LOSE    = 4'd8;
 
 
     // -- Base frame rate --
@@ -46,35 +48,45 @@ module vgaSignals(
         .clk(clk),
         .out(frameRate)
     );
-    defparam FRAME_RATE.MAX = 10_000_000;
+    defparam FRAME_RATE.MAX = 25_000_000;
 
 
     // -- Drawing data --
     // Internal wires
-    wire sHome, sArcade, sGame, sEnd, sDog, sEat, sSleep, sSpin, sNun, sGimel, sHay, sShin;
-    wire [7:0] xHome, xArcade, xEnd, xGame, xDog, xEat, xSleep, xSpin, xNun, xGimel, xHay, xShin;
-    wire [6:0] yHome, yArcade, yEnd, yGame, yDog, yEat, ySleep, ySpin, yNun, yGimel, yHay, yShin;
-    wire [7:0] cHome, cArcade, cEnd, cGame, cDog, cEat, cSleep, cSpin, cNun, cGimel, cHay, cShin;
-    wire wHome, wArcade, wGame, wEnd, wDog, wEat, wSleep, wSpin, wNun, wGimel, wHay, wShin;
-    wire dHome, dArcade, dGame, dEnd, dDog, dEat, dSleep, dSpin, dNun, dGimel, dHay, dShin;
+    wire startBg, startFg;
+    wire sHome, sArcade, sGame, sEnd, sDog, sEat, sSleep, sDead, sSpin, sNun, sGimel, sHay, sShin, sWin, sLose;
+    wire [7:0] xHome, xArcade, xEnd, xGame, xDog, xEat, xSleep, xDead, xSpin, xNun, xGimel, xHay, xShin, xWin, xLose;
+    wire [6:0] yHome, yArcade, yEnd, yGame, yDog, yEat, ySleep, yDead, ySpin, yNun, yGimel, yHay, yShin, yWin, yLose;
+    wire [7:0] cHome, cArcade, cEnd, cGame, cDog, cEat, cSleep, cDead, cSpin, cNun, cGimel, cHay, cShin, cWin, cLose;
+    wire wHome, wArcade, wGame, wEnd, wDog, wEat, wSleep, wDead, wSpin, wNun, wGimel, wHay, wShin, wWin, wLose;
+    wire dHome, dArcade, dGame, dEnd, dDog, dEat, dSleep, dDead, dSpin, dNun, dGimel, dHay, dShin, dWin, dLose;
     wire doneBg, doneFg;
 
     // Start signals
-    wire startFg = (start | frameRate);
-    assign sHome = (startFg & (location == HOME));
-    assign sArcade = (startFg & (location == ARCADE));
-    assign sGame = (startFg & (location == GAME));
-    assign sDog = (doneBg & (action != GAME));
-    assign sSpin = (doneBg & (action == GAME));
-    assign sNun = (dSpin & (gameState == NUN));
-    assign sGimel = (dSpin & (gameState == GIMEL));
-    assign sHay = (dSpin & (gameState == HAY));
-    assign sShin = (dSpin & (gameState == SHIN));
+    assign startBg = (start);
+    assign startFg = (doneBg);
+    // Background
+    assign sHome = (startBg); // & (location == HOME));
+    assign sArcade = (startBg); // & (location == ARCADE));
+    assign sGame = (startBg); // & (location == GAME));
+    assign sEnd = (startBg);
+    // Foreground
+    assign sDog = (startFg); // & (action != GAME));
+    assign sEat = (startFg);
+    assign sSleep = (startFg);
+    assign sDead = (startFg);
+    assign sSpin = (startFg); // & (gameState == SPIN));
+    assign sNun = (startFg); // & (gameState == NUN));
+    assign sGimel = (startFg); // & (gameState == GIMEL));
+    assign sHay = (startFg); // & (gameState == HAY));
+    assign sShin = (startFg); // & (gameState == SHIN));
+    assign sWin = (startFg);
+    assign sLose = (startFg);
 
     // Done signals
     assign doneBg = (dHome | dArcade | dGame | dEnd);
     assign doneFg = (dDog | dEat | dSleep |
-                     dSpin | dNun | dGimel | dHay | dShin);
+        dSpin | dNun | dGimel | dHay | dShin | dWin | dLose);
 
     // -- Module instantiations --
     // - Background -
@@ -154,6 +166,44 @@ module vgaSignals(
     defparam DRAW_END.Y_MAX = 120;
     defparam DRAW_END.IMAGE = "assets/end.mif";
 
+    // Win
+    draw DRAW_WIN(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sWin),
+        .xInit(8'd0),
+        .yInit(7'd0),
+        .xOut(xWin),
+        .yOut(yWin),
+        .colour(cWin),
+        .writeEn(wWin),
+        .done(dWin)
+    );
+    defparam DRAW_WIN.X_WIDTH = 8;
+    defparam DRAW_WIN.Y_WIDTH = 7;
+    defparam DRAW_WIN.X_MAX = 160;
+    defparam DRAW_WIN.Y_MAX = 120;
+    defparam DRAW_WIN.IMAGE = "assets/youwin.mif";
+
+    // Lose
+    draw DRAW_LOSE(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sLose),
+        .xInit(8'd0),
+        .yInit(7'd0),
+        .xOut(xLose),
+        .yOut(yLose),
+        .colour(cLose),
+        .writeEn(wLose),
+        .done(dLose)
+    );
+    defparam DRAW_LOSE.X_WIDTH = 8;
+    defparam DRAW_LOSE.Y_WIDTH = 7;
+    defparam DRAW_LOSE.X_MAX = 160;
+    defparam DRAW_LOSE.Y_MAX = 120;
+    defparam DRAW_LOSE.IMAGE = "assets/youloseD.mif";
+
 
     // - Foreground -
     // Dog
@@ -213,13 +263,32 @@ module vgaSignals(
     defparam DRAW_SLEEP.Y_MAX = 40;
     defparam DRAW_SLEEP.IMAGE = "assets/dog-sleep.mif";
 
+    // Dead
+    draw DRAW_DEAD(
+        .resetn(resetn),
+        .clk(clk),
+        .start(sDead),
+        .xInit(8'd60),
+        .yInit(7'd80),
+        .xOut(xDead),
+        .yOut(yDead),
+        .colour(cDead),
+        .writeEn(wDead),
+        .done(dDead)
+    );
+    defparam DRAW_DEAD.X_WIDTH = 6;
+    defparam DRAW_DEAD.Y_WIDTH = 6;
+    defparam DRAW_DEAD.X_MAX = 40;
+    defparam DRAW_DEAD.Y_MAX = 40;
+    defparam DRAW_DEAD.IMAGE = "assets/dog-dead.mif";
+
     // Spin
     draw DRAW_SPIN(
         .resetn(resetn),
         .clk(clk),
         .start(sSpin),
         .xInit(8'd60),
-        .yInit(7'd80),
+        .yInit(7'd40),
         .xOut(xSpin),
         .yOut(ySpin),
         .colour(cSpin),
@@ -238,7 +307,7 @@ module vgaSignals(
         .clk(clk),
         .start(sNun),
         .xInit(8'd60),
-        .yInit(7'd80),
+        .yInit(7'd40),
         .xOut(xNun),
         .yOut(yNun),
         .colour(cNun),
@@ -257,7 +326,7 @@ module vgaSignals(
         .clk(clk),
         .start(sGimel),
         .xInit(8'd60),
-        .yInit(7'd80),
+        .yInit(7'd40),
         .xOut(xGimel),
         .yOut(yGimel),
         .colour(cGimel),
@@ -276,7 +345,7 @@ module vgaSignals(
         .clk(clk),
         .start(sHay),
         .xInit(8'd60),
-        .yInit(7'd80),
+        .yInit(7'd40),
         .xOut(xHay),
         .yOut(yHay),
         .colour(cHay),
@@ -295,7 +364,7 @@ module vgaSignals(
         .clk(clk),
         .start(sShin),
         .xInit(8'd60),
-        .yInit(7'd80),
+        .yInit(7'd40),
         .xOut(xShin),
         .yOut(yShin),
         .colour(cShin),
@@ -312,9 +381,9 @@ module vgaSignals(
     // -- Control --
     // Declare state values
     localparam  IDLE    = 4'h0,
-                DRAW_BG = 4'h1,
-                DRAW_FG = 4'h2,
-                DONE    = 4'h3;
+        DRAW_BG = 4'h1,
+        DRAW_FG = 4'h2,
+        DONE    = 4'h3;
 
     // State register
     reg [3:0] currentState;
@@ -332,9 +401,9 @@ module vgaSignals(
             currentState <= IDLE;
         end
         else begin
-            case (currentState)
+                case (currentState)
                 IDLE: begin
-                    currentState <= (start) ? DRAW_BG: IDLE;
+                    currentState <= (startBg) ? DRAW_BG: IDLE;
                     x <= 8'b0; // reset x
                     y <= 7'b0; // reset y
                     colour <= 8'b0; // reset colour
@@ -355,6 +424,12 @@ module vgaSignals(
                             colour <= cArcade;
                         end
 
+                        GAME: begin
+                            x <= xGame;
+                            y <= yGame;
+                            colour <= cGame;
+                        end
+
                         END: begin
                             x <= xEnd;
                             y <= yEnd;
@@ -362,6 +437,7 @@ module vgaSignals(
                         end
 
                         default: begin
+                            currentState <= DONE;
                             x <= 8'bz;
                             y <= 7'bz;
                             colour <= 8'bz;
@@ -370,9 +446,9 @@ module vgaSignals(
                 end
 
                 DRAW_FG: begin
+                    currentState <= (doneFg) ? DONE : DRAW_FG;
                     case (location)
                         HOME: begin
-                            currentState <= (doneFg) ? DONE : DRAW_FG;
                             case (action)
                                 STAY: begin
                                     x <= xDog;
@@ -395,11 +471,12 @@ module vgaSignals(
                         end
 
                         ARCADE: begin
-                            currentState <= (doneFg) ? DONE : DRAW_FG;
+                            x <= xDog;
+                            y <= yDog;
+                            colour <= cDog;
                         end
 
                         GAME: begin
-                            currentState <= (doneFg) ? DONE : DRAW_FG;
                             case (gameState)
                                 SPIN: begin
                                     x <= xSpin;
@@ -430,7 +507,25 @@ module vgaSignals(
                                     y <= yShin;
                                     colour <= cShin;
                                 end
+
+                                WIN: begin
+                                    x <= xWin;
+                                    y <= yWin;
+                                    colour <= cWin;
+                                end
+
+                                LOSE: begin
+                                    x <= xLose;
+                                    y <= yLose;
+                                    colour <= cLose;
+                                end
                             endcase
+                        end
+
+                        END: begin
+                            x <= xDead;
+                            y <= yDead;
+                            colour <= cDead;
                         end
 
                         default: begin
@@ -441,9 +536,11 @@ module vgaSignals(
                     endcase
                 end
 
-                DONE: currentState <= (~start) ? IDLE : DONE;
+                DONE:
+                    currentState <= (~start) ? IDLE : DONE;
 
-                default: currentState <= IDLE;
+                default:
+                    currentState <= IDLE;
             endcase
         end
     end // stateFFs

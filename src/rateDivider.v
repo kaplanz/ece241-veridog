@@ -24,10 +24,12 @@ module rateDivider(input resetn, clk, output out);
             counter <= {WIDTH{1'b0}}; // reset counter
         end
         else begin
-            counter <= counter + {{WIDTH-1{1'b0}}, 1'b1}; // increment counter
             if (counter == MAX) begin
                 counter <= {WIDTH{1'b0}}; // reset counter
             end
+                else begin
+                    counter <= counter + 1; // {{WIDTH-1{1'b0}}, 1'b1}; // increment counter
+                end
         end
     end // counterUpdate
 endmodule

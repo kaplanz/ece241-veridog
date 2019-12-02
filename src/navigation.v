@@ -30,7 +30,7 @@ module navigation(
                 GO_ARCADE   = {1'b1, 8'h20},
                 ARCADE      = {1'b0, 8'h20},
 
-                DO_GAME     = {1'b1, 8'h30},
+                DO_GAME     = {1'b1, 8'h33},
                 GAME        = {1'b0, 8'h33},
 
                 END         = {1'b1, 8'hFF};
@@ -54,8 +54,8 @@ module navigation(
             case (currentState)
                 ROOT: begin // choose next location
                     case (keys)
-                        3'b001: currentState = GO_HOME;
-                        default: currentState = ROOT;
+                        3'b001: currentState <= GO_HOME;
+                        default: currentState <= ROOT;
                     endcase
                 end
 
@@ -63,10 +63,10 @@ module navigation(
                 GO_HOME: currentState = (keys == 3'b0) ? HOME : GO_HOME;
                 HOME: begin // choose action
                     case (keys)
-                        3'b100: currentState = DO_EAT;
-                        3'b010: currentState = DO_SLEEP;
-                        3'b001: currentState = GO_ARCADE;
-                        default: currentState = HOME;
+                        3'b100: currentState <= DO_EAT;
+                        3'b010: currentState <= DO_SLEEP;
+                        3'b001: currentState <= GO_ARCADE;
+                        default: currentState <= HOME;
                     endcase
                 end
                 // Home actions
@@ -76,12 +76,12 @@ module navigation(
                 SLEEP: currentState <= (doneAction) ? GO_HOME : SLEEP;
 
                 // Stay in load state until keys released, load background
-                GO_ARCADE: currentState = (keys == 3'b0) ? ARCADE : GO_ARCADE;
+                GO_ARCADE: currentState <= (keys == 3'b0) ? ARCADE : GO_ARCADE;
                 ARCADE: begin // choose action
                     case (keys)
-                        3'b100: currentState = DO_GAME;
-                        3'b001: currentState = GO_HOME;
-                        default: currentState = ARCADE;
+                        3'b100: currentState <= DO_GAME;
+                        3'b001: currentState <= GO_HOME;
+                        default: currentState <= ARCADE;
                     endcase
                 end
                 // Game actions
@@ -89,7 +89,7 @@ module navigation(
                 GAME: currentState <= (doneAction) ? GO_ARCADE : GAME;
 
                 // Default to ROOT state
-                default: currentState = ROOT;
+                default: currentState <= ROOT;
             endcase
         end
     end // stateFFs

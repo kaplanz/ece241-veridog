@@ -9,10 +9,8 @@
 module veridog(
     input CLOCK_50,             // On Board 50 MHz
     input [3:0] KEY,            // On Board Keys
-    input [9:0] SW,             // On Board Switches
 
-    output [6:0] HEX0, HEX1,    // On Board HEX
-    output [6:0] HEX2, HEX3,
+    output [6:0] HEX0, HEX1,    // On Board HEXs
     output [6:0] HEX4, HEX5,
     output [9:0] LEDR,          // On Board LEDs
 
@@ -83,7 +81,7 @@ module veridog(
     wire doneAction = (doneHomeAction | doneGameAction);
 
     // Navigation
-    wire startDraw;
+    wire transition;
     wire [3:0] location, action;
     wire [2:0] keys = ~KEY[2:0];
     navigation NAV(
@@ -92,42 +90,47 @@ module veridog(
         .keys(keys),
         .doneAction(doneAction),
         .gameEnd((hunger == 8'b0) & (sleepiness == 8'b0)),
-        .transition(startDraw),
+        .transition(transition),
         .location(location),
         .action(action)
     );
 
     // Stats
+    wire doEat = (transition & (action == EAT));
+    wire doSleep = (transition & (action == SLEEP));
     homeActions HOME_ACTIONS(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .doEat(action == EAT),
-        .doSleep(action == SLEEP),
+        .doEat(doEat),
+        .doSleep(doSleep),
         .hunger(hunger),
         .sleepiness(sleepiness),
         .done(doneHomeAction)
     );
 
     // Game
-    wire doneGame;
+    wire doGame = (transition & (action == GAME));
+    wire redrawGame;
     wire [3:0] gameState;
     wire [9:0] gameScore;
     gameActions GAME_ACTIONS(
-       .resetn(resetn),
-       .clk(CLOCK_50),
-       .doGame(action == GAME),
-       .randIn({hunger[1], sleepiness[0]}),
-       .gameState(gameState),
-       .score(gameScore),
-       .done(doneGameAction)
+        .resetn(resetn),
+        .clk(CLOCK_50),
+        .doGame(doGame),
+        .keys(keys),
+        .gameState(gameState),
+        .score(gameScore),
+        .redraw(redrawGame),
+        .done(doneGameAction)
     );
 
 
     // -- VGA --
+    wire redraw = (transition | doneAction | redrawGame);
     vgaSignals VGA_SIGNALS(
         .resetn(resetn),
         .clk(CLOCK_50),
-        .start(startDraw),
+        .start(redraw),
         .location(location),
         .action(action),
         .gameState(gameState),
@@ -140,20 +143,16 @@ module veridog(
 
 
     // -- Outputs --
-    // Navigation
-    seg7 hex1(location, HEX1); // debug
-    seg7 hex0(action, HEX0); // debug
-
     // Stats
-    wire hunger_d1 = (hunger[7:0] / 10) % 10;
-    wire hunger_d0 = hunger[7:0] % 10;
-    seg7 hex5(hunger_d1, HEX5);
-    seg7 hex4(hunger_d0 , HEX4);
+    wire [3:0] hungerD1 = (hunger[7:0] / 8'd10) % 8'd10;
+    wire [3:0] hungerD0 = (hunger[7:0] % 8'd10);
+    seg7 hex5(hungerD1, HEX5);
+    seg7 hex4(hungerD0 , HEX4);
 
-    wire sleepiness_d1 = (sleepiness[7:0] / 10) % 10;
-    wire sleepiness_d0 = sleepiness[7:0] % 10;
-    seg7 hex3(sleepiness_d1, HEX3);
-    seg7 hex2(sleepiness_d0, HEX2);
+    wire [3:0] sleepinessD1 = (sleepiness[7:0] / 8'd10) % 8'd10;
+    wire [3:0] sleepinessD0 = (sleepiness[7:0] % 8'd10);
+    seg7 hex1(sleepinessD1, HEX1);
+    seg7 hex0(sleepinessD0, HEX0);
 
     // Game
     assign LEDR[9:0] = gameScore;

@@ -11,17 +11,17 @@ module homeActions(
     input clk,
     input doEat, doSleep,
 
-    output [6:0] hunger,
-    output [6:0] sleepiness,
+    output [7:0] hunger,
+    output [7:0] sleepiness,
     output done
     );
 
     // -- Local parameters --
     // Actions
-    localparam  IDLE    = 4'h0,
-                EAT     = 4'h1,
-                SLEEP   = 4'h2,
-                DONE    = 4'h3;
+    localparam  IDLE    = 4'd0,
+                EAT     = 4'd1,
+                SLEEP   = 4'd2,
+                DONE    = 4'd3;
 
 
     // -- Internal signals --
@@ -86,13 +86,17 @@ module homeActions(
                         currentState <= SLEEP;
                 end
 
-                EAT: currentState <= (doneAction) ? DONE: EAT;
+                EAT:
+                    currentState <= (doneAction) ? DONE: EAT;
 
-                SLEEP: currentState <= (doneAction) ? DONE: SLEEP;
+                SLEEP:
+                    currentState <= (doneAction) ? DONE: SLEEP;
 
-                DONE: currentState <= (~doAction) ? IDLE : DONE;
+                DONE:
+                    currentState <= (~doAction) ? IDLE : DONE;
 
-                default: currentState <= IDLE;
+                default:
+                    currentState <= IDLE;
             endcase
         end
     end // stateFFs
