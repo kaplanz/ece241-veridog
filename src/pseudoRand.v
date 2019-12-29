@@ -1,6 +1,6 @@
 //
 //  pseudoRand.v
-//  Pseudo random counter
+//  Pseudo random counter.
 //
 //  Created by Alex Lehner on 2019-11-27.
 //  Copyright © 2019 Alex Lehner. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  rateDivider.v
-//  Rate divider
+//  Rate divider.
 //
 //  Created by Alex Lehner on 2019-11-10.
 //  Copyright © 2019 Alex Lehner. All rights reserved.

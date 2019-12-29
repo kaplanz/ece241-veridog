@@ -1,6 +1,6 @@
 //
 //  gameActions.v
-//  gameActions
+//  gameActions.
 //
 //  Created by Alex Lehner on 2019-11-25.
 //  Copyright © 2019 Alex Lehner. All rights reserved.

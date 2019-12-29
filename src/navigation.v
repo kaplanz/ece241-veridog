@@ -1,6 +1,6 @@
 //
 //  navigation.v
-//  Navigation FSM
+//  Navigation FSM.
 //
 //  Created by Zakhary Kaplan on 2019-11-10.
 //  Copyright © 2019 Zakhary Kaplan. All rights reserved.

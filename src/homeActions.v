@@ -1,6 +1,6 @@
 //
 //  homeActions.v
-//  homeActions
+//  homeActions.
 //
 //  Created by Alex Lehner on 2019-11-15.
 //  Copyright © 2019 Alex Lehner. All rights reserved.

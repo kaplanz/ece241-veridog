@@ -1,6 +1,6 @@
 //
 //  veridog.v
-//  Veridog top level module
+//  Veridog top level module.
 //
 //  Created by Zakhary Kaplan on 2019-11-11.
 //  Copyright © 2019 Zakhary Kaplan. All rights reserved.

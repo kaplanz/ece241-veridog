@@ -1,6 +1,6 @@
 //
 //  seg7.v
-//  7-segment decoder
+//  7-segment decoder.
 //
 //  Created by Zakhary Kaplan on 2019-09-29.
 //  Copyright © 2019 Zakhary Kaplan. All rights reserved.
