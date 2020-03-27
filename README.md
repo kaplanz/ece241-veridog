@@ -1,4 +1,4 @@
-# veridog
+# ece241-veridog
 
 *veridog* is a dog-themed Tamagotchi, written in Verilog as a final project ECE241 at the University of Toronto.
 
