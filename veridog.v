@@ -1,10 +1,7 @@
-//
-//  veridog.v
-//  Veridog top level module.
-//
-//  Created by Zakhary Kaplan on 2019-11-11.
-//  Copyright © 2019 Zakhary Kaplan. All rights reserved.
-//
+// File:        veridog.v
+// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Created:     25 Nov 2019
+// SPDX-License-Identifier: NONE
 
 module veridog(
     input CLOCK_50,             // On Board 50 MHz

@@ -1,10 +1,7 @@
-//
-//  draw.v
-//  Draw an image from ROM.
-//
-//  Created by Zakhary Kaplan on 2019-11-12.
-//  Copyright © 2019 Zakhary Kaplan. All rights reserved.
-//
+// File:        draw.v
+// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Created:     25 Nov 2019
+// SPDX-License-Identifier: NONE
 
 module draw #(
     parameter   X_WIDTH = 8,

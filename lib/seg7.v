@@ -1,10 +1,7 @@
-//
-//  seg7.v
-//  7-segment decoder.
-//
-//  Created by Zakhary Kaplan on 2019-09-29.
-//  Copyright © 2019 Zakhary Kaplan. All rights reserved.
-//
+// File:        seg7.v
+// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Created:     29 Sep 2019
+// SPDX-License-Identifier: NONE
 
 module seg7(
     input [3:0] dataIn,

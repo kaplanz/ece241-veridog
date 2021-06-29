@@ -1,10 +1,7 @@
-//
-//  vgaSignals.v
-//  VGA input signals
-//
-//  Created by Zakhary Kaplan on 2019-11-20.
-//  Copyright © 2019 Zakhary Kaplan. All rights reserved.
-//
+// File:        vgaSignals.v
+// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Created:     25 Nov 2019
+// SPDX-License-Identifier: NONE
 
 module vgaSignals(
     input resetn,
