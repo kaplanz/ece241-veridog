@@ -1,5 +1,5 @@
 // File:        seg7.v
-// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Author:      Zakhary Kaplan <https://zakhary.dev>
 // Created:     29 Sep 2019
 // SPDX-License-Identifier: NONE
 

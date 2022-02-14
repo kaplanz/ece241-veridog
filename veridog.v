@@ -1,5 +1,5 @@
 // File:        veridog.v
-// Author:      Zakhary Kaplan <https://zakharykaplan.ca>
+// Author:      Zakhary Kaplan <https://zakhary.dev>
 // Created:     25 Nov 2019
 // SPDX-License-Identifier: NONE
 
